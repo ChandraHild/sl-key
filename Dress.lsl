@@ -40,29 +40,32 @@ list newoutfits;
 string oldattachmentpoints;
 integer newoutfitwordend;
 
-setup ()  {
+setup()
+{
     dollID =   llGetOwner();
     candresstemp = TRUE;
     llOwnerSay("@getinv=2555");
 
-//from dollkey36
+    //from dollkey36
 
     integer ncd = ( -1 * (integer)("0x"+llGetSubString((string)llGetKey(),-5,-1)) ) -1;
-    if (channel_dialog != ncd) {
-           llListenRemove(listen_id_2667); 
+    if (channel_dialog != ncd)
+    {
+        llListenRemove(listen_id_2667);
         channel_dialog = ncd;
         cd2667 = channel_dialog - 2667;
         llListenRemove(listen_id_2667);
         listen_id_2667 = llListen( cd2667, "", "", "");
-
     }
-    if (dollID != setupID) {
+
+    if (dollID != setupID)
+    {
         llListenRemove(listen_id_2555);
         llListenRemove(listen_id_outfitrequest3);
         llListenRemove(listen_id_outfitrequest);
         llListenRemove(listen_id_2668); 
         llListenRemove(listen_id_2669); 
-         llSleep(2.0);
+        llSleep(2.0);
         listen_id_2555 = llListen(2555, "", dollID, "");
         listen_id_outfitrequest3 = llListen(2665, "", dollID, "");
         listen_id_outfitrequest = llListen(2666, "", dollID, "");
@@ -72,15 +75,18 @@ setup ()  {
     }
 }
 
-dressmenu (string choice) {
+dressmenu(string choice)
+{
     list Outfits = llParseString2List(choice, [","], []); //what are brackets at end?
     newoutfits = [];
     integer n;
     integer iStop = llGetListLength(Outfits);
     string itemname;
-    for (n = 0; n < iStop; n++) {
+    for (n = 0; n < iStop; n++)
+    {
         itemname = llList2String(Outfits, n);
-        if (llGetSubString(itemname,0,0) != "~"  && llGetSubString(itemname,0,0) != "*"&& itemname != oldoutfitname) {
+        if (llGetSubString(itemname,0,0) != "~"  && llGetSubString(itemname,0,0) != "*"&& itemname != oldoutfitname)
+        {
             newoutfits += itemname;
         }
     }
@@ -89,18 +95,23 @@ dressmenu (string choice) {
     dressdialog();
 }
 
-randomdress (string choice) {
+randomdress(string choice)
+{
     // gets random outfit
     list Outfits = llParseString2List(choice, [","], []); //what are brackets at end? 
     list newoutfits = [];
     integer n;
     integer iStop = llGetListLength(Outfits);
-    if (iStop == 0) {   //folder is empty, switching to regular folder
+    if (iStop == 0)
+    {
+        //folder is empty, switching to regular folder
         llOwnerSay("There are no outfits in your " + clothingprefix + " folder.");
-        if (bigprefix) {
+        if (bigprefix)
+        {
             clothingprefix = bigprefix + "/";
         }
-        else {
+        else
+        {
             clothingprefix = "";
         }
     }
@@ -108,10 +119,12 @@ randomdress (string choice) {
         string itemname;
         string prefix;
         integer total = 0;
-        for (n = 0; n < iStop; n++) {
+        for (n = 0; n < iStop; n++)
+        {
             itemname = llList2String(Outfits, n);
             prefix = llGetSubString(itemname,0,0);
-            if (prefix != "~" && prefix != "*") {
+            if (prefix != "~" && prefix != "*")
+            {
                 total += 1;
                 newoutfits += itemname;
             }
@@ -122,9 +135,9 @@ randomdress (string choice) {
     }
 }
 
-dressdialog ()
+dressdialog()
 {
-//picks out
+    //picks out
     list newoutfits2;
     integer numoutfits = llGetListLength(newoutfits);
     integer curpagesize = pagesize;
@@ -146,7 +159,8 @@ dressdialog ()
         newoutfits2 = newoutfits;
     }
     string msgg = "You may choose any outfit.";
-    if (dresserID == dollID) {
+    if (dresserID == dollID)
+    {
         msgg =     "See http://communitydolls.com/outfits.htm for information on outfits.";
     }
     msgg += pages + "\n\n";
@@ -156,23 +170,29 @@ dressdialog ()
         msgg += (string)(start+x+1) + ". " + llList2String(newoutfits2, x) + "\n";
         outfitlist += (string)(start+x+1);
     }
-   llDialog(dresserID, msgg,outfitlist, cd2667);    
+    llDialog(dresserID, msgg,outfitlist, cd2667);
 }
-dress (string choice) {
+
+dress(string choice)
+{
     llSay(0, llGetDisplayName(dollID) + " is being dressed in " + choice + ".");
     candresstemp = FALSE;
     newoutfitname = choice;
-    if (clothingprefix == "") {
+    if (clothingprefix == "")
+    {
         newoutfit = choice;
     }
-    else {
+    else
+    {
         newoutfit = clothingprefix + "/" + choice;
     }
-    newoutfitwordend = llStringLength(newoutfit)  - 1;
+    newoutfitwordend = llStringLength(newoutfit) - 1;
     llOwnerSay("@detach=force");
     llOwnerSay("@remoutfit=force");
     llSleep(5.0);
-    if (llGetSubString(oldoutfitname,0,0) == "+" && llGetSubString(newoutfitname,0,0) != "+") {  // only works well assuming in regular
+    if (llGetSubString(oldoutfitname,0,0) == "+" && llGetSubString(newoutfitname,0,0) != "+")
+    {
+        // only works well assuming in regular
         llOwnerSay("@attach:~normalself=force");
     }
     llOwnerSay("@attachallover:" + newoutfit + "=force");
@@ -183,65 +203,86 @@ dress (string choice) {
     candresstimeout = 2;
 }
 
-default {
-    state_entry() {
+default
+{
+    state_entry()
+    {
         channel_dialog = 0;
         setup();
         llSetTimerEvent(10.0);  //clock is accessed every ten seconds;
         clothingprefix = "";
     }
 
-        on_rez(integer iParam) {
+    on_rez(integer iParam)
+    {
         setup();
-     }
+    }
 
-    timer() {   //called everytimeinterval 
-        if (candresstimeout-- == 0) {
+    timer()
+    {
+        //called everytimeinterval
+        if (candresstimeout-- == 0)
+        {
             candresstemp = TRUE;
         }
     }
 
-     link_message(integer source, integer num, string choice, key id) {
-// need to disallow dressing while dressing is happening
-        if (num == 1)  { 
-            if (candresstemp == FALSE) {
+    link_message(integer source, integer num, string choice, key id)
+    {
+        // need to disallow dressing while dressing is happening
+        if (num == 1)
+        {
+            if (!candresstemp)
+            {
                 llSay(0, "She cannot be dressed right now; she is already dressing");
             }
-            else if (choice == "start") {
+            else if (choice == "start")
+            {
                 dresserID = id;
 
                 candresstimeout = 8;
-                if (clothingprefix == "") {
+                if (clothingprefix == "")
+                {
                     llOwnerSay("@getinv=2666");
                 }
-                else {
+                else
+                {
                     llOwnerSay("@getinv:" + clothingprefix + "=2666");
                 }
             }
-            else if (choice == "random") {
+            else if (choice == "random")
+            {
                 //candresstemp = FALSE;
                 dresserID = id;
                 candresstimeout = 8;
-                if (clothingprefix == "") {
+                if (clothingprefix == "")
+                {
                     llOwnerSay("@getinv=2665");
                 }
-                else {
+                else
+                {
                     llOwnerSay("@getinv:" + clothingprefix + "=2665");
                 }
             }
         }
-        if (num == 2)  {  //probably should have been in transformer
+        if (num == 2)
+        {
+            //probably should have been in transformer
             string oldclothingprefix = clothingprefix;
-            if (bigprefix) {
+            if (bigprefix)
+            {
                 clothingprefix = bigprefix + "/" +  choice;
             }
-            else {
+            else
+            {
                 clothingprefix = choice;
             }
-            if (clothingprefix != oldclothingprefix) {
+            if (clothingprefix != oldclothingprefix)
+            {
                 llOwnerSay("@detach:" + oldclothingprefix + "/~AO=force");
                 llOwnerSay("@attach:" + clothingprefix + "/~AO=force");
-                if (oldclothingprefix != "") {
+                if (oldclothingprefix != "")
+                {
                     //remove tatoo");
                     llOwnerSay("@remoutfit:" + clothingprefix + "/tatoo=force");
                     llOwnerSay("@attach:~normalself=force");
@@ -250,53 +291,62 @@ default {
 
                 llOwnerSay("@attach:" + clothingprefix + "/~normalself=force");
             }
-            
-
             //puts on ~normalself
         }
+    }
+    // First, all clothes are taken off except for skull and anything that might be revealing.
+    // Then the new outfit is put on. It uses replace, so it should take off any old clothes.
+    // Then there is an 8 second wait and then the new outfit is put on again! In case something was locked. This I think explains the double put-on.
+    // Then the places are checked where there could be old clothes still on. If anything is there, according to whatever is returned, the id is checked and it is taken off if they are old.
+    // This last step takes off all the clothes that weren't replaced.
 
-     }
-// First, all clothes are taken off except for skull and anything that might be revealing.
-// Then the new outfit is put on. It uses replace, so it should take off any old clothes.
-// Then there is an 8 second wait and then the new outfit is put on again! In case something was locked. This I think explains the double put-on.
-// Then the places are checked where there could be old clothes still on. If anything is there, according to whatever is returned, the id is checked and it is taken off if they are old.
-// This last step takes off all the clothes that weren't replaced.
+    //There is one place where the old outfit is removed.
 
-//There is one place where the old outfit is removed.
-
-    listen(integer channel, string name, key id, string choice) {
-        if (channel == 2555) { // looks for one folder at start
+    listen(integer channel, string name, key id, string choice)
+    {
+        if (channel == 2555)
+        { // looks for one folder at start
             string oldbigprefix = bigprefix;
             list Outfits = llParseString2List(choice, [","], []); //what are brackets at end? 
             integer n;
             integer iStop = llGetListLength(Outfits);
             string itemname;
             bigprefix = "";
-            for (n = 0; n < iStop; n++) {
-                        itemname = llList2String(Outfits, n);
-                if (itemname == bigsubfolder) {
+            for (n = 0; n < iStop; n++)
+            {
+                itemname = llList2String(Outfits, n);
+                if (itemname == bigsubfolder)
+                {
                     bigprefix = bigsubfolder;
                 }
-                else if (itemname == "outfits") {
+                else if (itemname == "outfits")
+                {
                     bigprefix = "outfits";
                 }
-                else if (itemname == "Outfits") {
+                else if (itemname == "Outfits")
+                {
                     bigprefix = "Outfits";
                 }
             }
-            if (bigprefix != oldbigprefix) {  //outfits-don't-match-type bug only occurs when big prefix is changed
+            if (bigprefix != oldbigprefix)
+            {
+                //outfits-don't-match-type bug only occurs when big prefix is changed
                 clothingprefix = bigprefix;
             }
         }
-        if (channel == 2665) {
+        if (channel == 2665)
+        {
             dressmenu(choice);
         }
 
-        if (channel == 2666) {
+        if (channel == 2666)
+        {
             dressmenu(choice);
-         }
+        }
 
-        else if (channel == cd2667  && choice != "OK") {  //the random outfit from 2665 didn't work with the above
+        else if (channel == cd2667  && choice != "OK")
+        {
+            //the random outfit from 2665 didn't work with the above
             if (choice == NEXT)
             {
                 integer numoutfits = llGetListLength(newoutfits);
@@ -332,5 +382,3 @@ default {
         }
     }
 }
-
-

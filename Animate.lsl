@@ -17,84 +17,107 @@ debug(string message)
     // llOwnerSay("Debug: " + message);
 }
 
-setup() {
+setup()
+{
     usingOC = FALSE;
     dollID = llGetOwner();
     interfaceChannel = (integer)("0x" + llGetSubString(dollID,30,-1));
-    if (interfaceChannel > 0) {
+    if (interfaceChannel > 0)
+    {
         interfaceChannel = -interfaceChannel;
     }
     testing = TRUE;
     llWhisper(interfaceChannel, "OpenCollar?");
-       llListenRemove(listen_id_OC); 
-    listen_id_OC = llListen( interfaceChannel, "", "", "");
+    llListenRemove(listen_id_OC);
+    listen_id_OC = llListen(interfaceChannel, "", "", "");
     llSleep(3.0);
-    if (current == "collapse") {
+    if (current == "collapse")
+    {
         startanimation("collapse");
     }
-    else {
+    else
+    {
         posing = FALSE;
     }
     //timer to turn this off if it isn't being used
 }
 
-startanimation(string next) {
-    if (next == "~off") {
-        if (usingOC == TRUE) {
-            llWhisper(interfaceChannel, "499|ZHAO_AOON");    
+startanimation(string next)
+{
+    if (next == "~off")
+    {
+        if (usingOC == TRUE)
+        {
+            llWhisper(interfaceChannel, "499|ZHAO_AOON");
         }
         llStopAnimation(current);
-        llReleaseControls( );
+        llReleaseControls();
     }
-    else {
-        if (usingOC == TRUE) {
-            llWhisper(interfaceChannel, "499|ZHAO_AOOFF");    
+    else
+    {
+        if (usingOC)
+        {
+            llWhisper(interfaceChannel, "499|ZHAO_AOOFF");
         }
         newanimation = next;
         llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
     }
 }
 
-default {
-    state_entry() {
+default
+{
+    state_entry()
+    {
         posing = FALSE;
         setup();
     }
 
-        on_rez(integer iParam) {  //when key is put on, or when logging back on
+    on_rez(integer iParam) //when key is put on, or when logging back on
+    {
         setup();
-     }
-    link_message(integer source, integer num, string choice, key id) {
-        if (num == 59) {
+    }
+
+    link_message(integer source, integer num, string choice, key id)
+    {
+        if (num == 59)
+        {
             startanimation(choice);
         }
     }
-    listen(integer channel, string name, key id, string choice) {
-        if (channel == interfaceChannel) {
-            if (testing == TRUE && choice == "OpenCollar=Yes") {
+
+    listen(integer channel, string name, key id, string choice)
+    {
+        if (channel == interfaceChannel)
+        {
+            if (testing && choice == "OpenCollar=Yes")
+            {
                 usingOC = TRUE;
                 debug("Using OC method");
                 testing = FALSE;
             }
-            else {
+            else
+            {
                 debug("got this msg in listen: " + choice);
             }
         }
     }
-    run_time_permissions(integer perm) {
-        if (perm & PERMISSION_TRIGGER_ANIMATION) {
-            if (posing == TRUE && llStringLength(current) > 0) {
-                       llStopAnimation(current);
+
+    run_time_permissions(integer perm)
+    {
+        if (perm & PERMISSION_TRIGGER_ANIMATION)
+        {
+            if (posing && llStringLength(current) > 0)
+            {
+                llStopAnimation(current);
             }
             llStartAnimation(newanimation);
             current = newanimation;
             posing = TRUE;
         }
-        if (PERMISSION_TAKE_CONTROLS & perm) {
+        if (PERMISSION_TAKE_CONTROLS & perm)
+        {
             llTakeControls( CONTROL_FWD | CONTROL_BACK | CONTROL_LEFT | CONTROL_RIGHT | CONTROL_ROT_LEFT |
-                                 CONTROL_ROT_RIGHT | CONTROL_UP |  CONTROL_DOWN | CONTROL_LBUTTON | CONTROL_ML_LBUTTON , TRUE, FALSE);
+                         CONTROL_ROT_RIGHT | CONTROL_UP |  CONTROL_DOWN | CONTROL_LBUTTON | CONTROL_ML_LBUTTON , TRUE, FALSE);
         }
     }
-    
 }
-
