@@ -1,3 +1,19 @@
+//_170125 M04B
+//_
+//_. M01: on AFK:
+//_      ?A: (vs.AFK lockdown)turn AFK mode on, without halving the remaining time
+//_       B: stop winddown
+//_       C: dynamic TOmega
+//_. M02: options menu: reopen after choosing one
+//_. M03: unwind while sitting:
+//_       A: no unsit
+//_       B: AFK anim.
+//_. M04: winder script vs. dynamic dialog channel:
+//_       A: if touched by 'mistress', send channel (-60946337, 'wind channel|[chn]')
+//_       B: touch_start: -> _end
+//_
+//_- (vs.using no script parcels to unlock)+ANS
+//_
 string optiondate = "Aug. 31";
 //has afk, turns off ZHAO
 // skips over adding animations, puts in change 
@@ -97,7 +113,8 @@ handlemenuchoices(string choice, string name, key ToucherID) {
         }
         if (collapsed) {  //uncollapsing
             timeleftonkey = windamount;
-            llTargetOmega(<0,0,1>,.3,1.0);
+            //_M01C_llTargetOmega(<0,0,1>,.3,1.0);
+            if(winddown) llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);            //_M01C
             if (canfly) {
                 llOwnerSay("@fly=y");
             }
@@ -224,9 +241,11 @@ handlemenuchoices(string choice, string name, key ToucherID) {
 
 collapse(string s) {
     llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,sittp=n,standtp=n,accepttp=n,accepttp:" + (string) carrierID + "=add,accepttp:" + (string) mainwinder + "=add,accepttp:" + (string) MistressID + "=add,unsit=n,sit=n,shownames=n,showhovertextall=n");
-    llOwnerSay("@unsit=force"); // to get me off of pole? Does it stop dancing too?
+    //_M03A_llOwnerSay("@unsit=force"); // to get me off of pole? Does it stop dancing too?
     llOwnerSay("@tplure=n,tplure:" + (string) mainwinder + "=add,tplure:" + (string) MistressID + "=add");
-    newanimation = "collapse";
+    //_newanimation = "collapse";                            //_M03B \/
+    if(!( llGetAgentInfo(dollID) & AGENT_SITTING)) newanimation = "collapse";
+    else                                           newanimation = "away";        //_M03B /\
 
     if (s == "start") {
             llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
@@ -396,7 +415,7 @@ default {
         }
     }
 
-    touch_start(integer total_number) {
+    touch_end(integer total_number) {                            //_M04B
         integer displaytime = (integer) ((timeleftonkey+5) / 6) ;
         string timeleft = "Time Left on key is " + (string)displaytime + " minutes. ";
         key ToucherID = llDetectedKey(0);  //detects user UUID
@@ -465,6 +484,7 @@ default {
          if ((ToucherID == MistressID ||ToucherID == ChristinaID) && ToucherID != dollID) {
 
             menu += ["Carry","Use Control"];
+            llWhisper(-60946337, "wind channel|" + (string)channel_dialog);        //_M04A
         }
         llDialog(ToucherID, timeleft + msg,  menu, channel_dialog);
     }
@@ -503,7 +523,23 @@ default {
                 }
             }
         }
-    }
+        if( llGetAgentInfo(dollID) & AGENT_AWAY) {                    //_M01B \/
+         if(winddown) {
+          winddown = 0;
+          llTargetOmega(ZERO_VECTOR, 0.0, 0.0);                        //_M01C
+        }} else if(!afk) {
+         if(!winddown) {
+          winddown = 1;
+          llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);                    //_M01C
+        }}                                        //_M01B /\
+/*llSetText(
+ "afk=" + (string)afk +
+ "\nwinddown=" + (string)winddown +
+ "\ntimeleftonkey=" + (string)timeleftonkey +
+ " (" + (string)( (integer)( (timeleftonkey+5) / 6)) + "min.)",
+ <1.0, 1.0, 0.0>, 0.75
+);*/  //*->x
+     }
 
      link_message(integer source, integer num, string choice, key id) {
         if (num == 16) {
@@ -603,6 +639,7 @@ default {
             else if (choice == "start afk") {
                 llSetText("afk", <1,1,1>, 2);
                 winddown = FALSE;
+                llTargetOmega(ZERO_VECTOR, 0.0, 0.0);                    //_M01C
                 llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,tplure=n,sittp=n,standtp=n,accepttp=n,unsit=n,sit=n");
                 afk = TRUE;
             }
@@ -614,6 +651,13 @@ default {
                     llSetText("", <1,1,1>, 2);
                 }
                 winddown = TRUE;
+                llTargetOmega(<0.0, 0.0, 1.0>, 3.0, 1.0);                //_M01C \/
+                llSleep(2.0);
+                llTargetOmega(<0.0, 0.0, 1.0>, 2.0, 1.0);
+                llSleep(1.0);
+                llTargetOmega(<0.0, 0.0, 1.0>, 1.0, 1.0);
+                llSleep(1.0);
+                llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);                //_M01C /\
                 afk = FALSE;
                 timeleftonkey =  timeleftonkey / 2;
                 if (canfly) {
@@ -630,6 +674,7 @@ default {
             else if (choice == "Turn off Sign") {
                    llSetText("", <1,1,1>, 2);
             }
+            handlemenuchoices("Options", name, id);                    //_M02
         }
 
         else if (channel == 6011 && choice == "detach") {
@@ -742,4 +787,3 @@ default {
     }
 
 }
-
