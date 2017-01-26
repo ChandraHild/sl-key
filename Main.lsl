@@ -542,7 +542,7 @@ default
                 {
                     menu += "Be Controller";
                 }
-                if (pleasuredoll > 0 || currentstate == "Slut")
+                if (pleasuredoll || currentstate == "Slut")
                 {
                     menu += "Strip";
                 }
@@ -892,7 +892,7 @@ default
             else if (choice == "make plsrdll")
             {
                 llSay(0, dollname + " has been made into a pleasure doll.");
-                pleasuredoll = 2;    
+                pleasuredoll = TRUE;    
             }
             else if (choice == "can fly")
             {
