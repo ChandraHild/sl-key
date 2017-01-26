@@ -1,4 +1,4 @@
-//_170126 CH03
+//_170126 CH04
 //_
 //_. M01: on AFK:
 //_      ?A: (vs.AFK lockdown)turn AFK mode on, without halving the remaining time
@@ -15,6 +15,7 @@
 //_. CH01: Capitalization of doll types
 //_. CH02: collapse() update
 //_. CH03: Key shouldn't wind if dolly is collapsed
+//_. CH04: Don't uncarry on logon if our owner was carrying us
 //_
 //_- (vs.using no script parcels to unlock)+ANS
 //_
@@ -163,7 +164,8 @@ handlemenuchoices(string choice, string name, key ToucherID) {
         }
         else {
             privatemenu += "detachable";
-        }        if (alwaysavailable) {
+        }
+        if (alwaysavailable) {
             privatemenu += "no auto tp";
         }
         else {
@@ -396,9 +398,9 @@ default {
         httpstart = "See http://CommunityDolls.com/";
     }
 
-        on_rez(integer iParam) {  //when key is put on, or when logging back on
+    on_rez(integer iParam) {  //when key is put on, or when logging back on
         setup();
-        if (carried) {
+        if (carried && carrierID != MistressID) {
             uncarry();
         }
         if (collapsed) {
