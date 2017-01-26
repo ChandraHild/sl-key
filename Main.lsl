@@ -1,4 +1,4 @@
-//_170125 M04B
+//_170126 CH02
 //_
 //_. M01: on AFK:
 //_      ?A: (vs.AFK lockdown)turn AFK mode on, without halving the remaining time
@@ -11,6 +11,9 @@
 //_. M04: winder script vs. dynamic dialog channel:
 //_       A: if touched by 'mistress', send channel (-60946337, 'wind channel|[chn]')
 //_       B: touch_start: -> _end
+//_
+//_. CH01: Capitalization of doll types
+//_. CH02: collapse() update
 //_
 //_- (vs.using no script parcels to unlock)+ANS
 //_
@@ -239,7 +242,7 @@ handlemenuchoices(string choice, string name, key ToucherID) {
     }
 }
 
-collapse(string s) {
+collapse() {
     llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,sittp=n,standtp=n,accepttp=n,accepttp:" + (string) carrierID + "=add,accepttp:" + (string) mainwinder + "=add,accepttp:" + (string) MistressID + "=add,unsit=n,sit=n,shownames=n,showhovertextall=n");
     //_M03A_llOwnerSay("@unsit=force"); // to get me off of pole? Does it stop dancing too?
     llOwnerSay("@tplure=n,tplure:" + (string) mainwinder + "=add,tplure:" + (string) MistressID + "=add");
@@ -247,19 +250,13 @@ collapse(string s) {
     if(!( llGetAgentInfo(dollID) & AGENT_SITTING)) newanimation = "collapse";
     else                                           newanimation = "away";        //_M03B /\
 
-    if (s == "start") {
-            llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
+    if (pose) {
+        pose = FALSE;
+        llStopAnimation(currentanimation);
+        llSleep(0.1);
     }
-    else {
-        if (pose) {
-            pose = FALSE;
-            llStopAnimation(currentanimation);
-            llRequestPermissions(dollID, PERMISSION_TRIGGER_ANIMATION);
-        }
-        else {
-            llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
-        }
-    }
+    llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
+
     llOwnerSay("@rediremote:999=add");
     llTargetOmega(ZERO_VECTOR, 0, 0);
     collapsed = TRUE;
@@ -404,7 +401,7 @@ default {
             uncarry();
         }
         if (collapsed) {
-            collapse("start");
+            collapse();
         }
 
      }
@@ -493,7 +490,7 @@ default {
         if (winddown == TRUE && collapsed == FALSE) {
             timeleftonkey -= 1;
             if (timeleftonkey < 0) {
-                collapse("out");
+                collapse();
                 llSay(0, dollname + " has run out of life");
             }
         }
