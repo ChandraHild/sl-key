@@ -16,6 +16,7 @@
 //_. CH02: collapse() update
 //_. CH03: Key shouldn't wind if dolly is collapsed
 //_. CH04: Don't uncarry on logon if our owner was carrying us
+//_. CH05: Set Muniki as Chandra's owner when the script resets
 //_
 //_- (vs.using no script parcels to unlock)+ANS
 //_
@@ -408,12 +409,20 @@ setup()
         stuck = FALSE; //problem with being stuck on private land -- no way to get off.
         candress = TRUE;
         canbecomemistress = FALSE;
-        hascontroller = FALSE;
         canfly = TRUE;
         cantransform = FALSE;
         winddown = TRUE;
         afk = FALSE;
-        MistressID = ChristinaID;
+        if (dollID == "27f02017-bf33-49f9-b7b9-9317b7791fc0") // CH05 Set Muniki as owner if we're Chandra!
+        {
+            hascontroller = TRUE;
+            MistressID = "ac80e0b5-04ab-44a9-8a79-2d85c85da247"; // Muniki's ID
+        }
+        else
+        {
+            hascontroller = FALSE;
+            MistressID = ChristinaID;
+        }
         timeleftonkey = 180; 
         llMessageLinked( -4, 200, "start", dollID );
         visible = TRUE;
