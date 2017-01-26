@@ -338,7 +338,7 @@ setup ()  {
         timeleftonkey = 180; 
         llMessageLinked( -4, 200, "start", dollID );
         visible = TRUE;
-        currentstate = "regular";
+        currentstate = "Regular";
 
     }
     dollname = llGetDisplayName(dollID);
@@ -445,7 +445,7 @@ default {
                 if (canbecomemistress) {
                     menu += "Be Controller";
                 }
-                if (pleasuredoll > 0 || currentstate == "slut") {
+                if (pleasuredoll > 0 || currentstate == "Slut") {
                     menu += "Strip";
                 }
             }
@@ -498,7 +498,7 @@ default {
             }
         }
         if (pose) {
-            if (collapsed == FALSE && currentstate != "display") {
+            if (collapsed == FALSE && currentstate != "Display") {
                 posetime -= 1;
                 if (posetime == 0) {
                     llStopAnimation(currentanimation);
@@ -644,7 +644,7 @@ default {
                 afk = TRUE;
             }
             else if (choice == "stop afk") {
-                if (currentstate != "regular") {
+                if (currentstate != "Regular") {
                     llSetText(currentstate, <1,1,1>, 2);
                 }
                 else {
