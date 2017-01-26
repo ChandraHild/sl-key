@@ -17,6 +17,7 @@
 //_. CH03: Key shouldn't wind if dolly is collapsed
 //_. CH04: Don't uncarry on logon if our owner was carrying us
 //_. CH05: Set Muniki as Chandra's owner when the script resets
+//_. CH06: Make startafk and stopafk functions
 //_
 //_- (vs.using no script parcels to unlock)+ANS
 //_
@@ -304,6 +305,49 @@ handlemenuchoices(string choice, string name, key ToucherID)
     }
 }
 
+startafk()
+{
+    // CH06
+    llSetText("afk", <1,1,1>, 2);
+    winddown = FALSE;
+    llTargetOmega(ZERO_VECTOR, 0.0, 0.0);                    //_M01C
+    llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,tplure=n,sittp=n,standtp=n,accepttp=n,unsit=n,sit=n");
+}
+
+stopafk()
+{
+    if (currentstate != "Regular")
+    {
+        llSetText(currentstate, <1,1,1>, 2);
+    }
+    else
+    {
+        llSetText("", <1,1,1>, 2);
+    }
+    winddown = TRUE;
+    llTargetOmega(<0.0, 0.0, 1.0>, 3.0, 1.0);                //_M01C \/
+    llSleep(2.0);
+    llTargetOmega(<0.0, 0.0, 1.0>, 2.0, 1.0);
+    llSleep(1.0);
+    llTargetOmega(<0.0, 0.0, 1.0>, 1.0, 1.0);
+    llSleep(1.0);
+    llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);                //_M01C /\
+
+    if (canfly)
+    {
+        llOwnerSay("@fly=y");
+    }
+    if (!stuck)
+    {
+        llOwnerSay("@tplm=y,tploc=y");
+    }
+    if (!alwaysavailable)
+    {
+        llOwnerSay("@accepttp=y");
+    }
+    llOwnerSay("@temprun=y,alwaysrun=y,sendchat=y,tplure=y,sittp=y,standtp=y,unsit=y,sit=y");
+}
+
 collapse()
 {
     llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,sittp=n,standtp=n,accepttp=n,accepttp:" + (string) carrierID + "=add,accepttp:" + (string) mainwinder + "=add,accepttp:" + (string) MistressID + "=add,unsit=n,sit=n,shownames=n,showhovertextall=n");
@@ -512,8 +556,9 @@ default
         }
     }
 
-    touch_end(integer total_number) //_M04B
+    touch_end(integer total_number)
     {
+        //_M04B
         integer displaytime = (integer) ((timeleftonkey+5) / 6);
         string timeleft = "Time Left on key is " + (string)displaytime + " minutes. ";
         key ToucherID = llDetectedKey(0);  //detects user UUID
@@ -654,16 +699,14 @@ default
         {
             if (winddown)
             {
-                winddown = 0;
-                llTargetOmega(ZERO_VECTOR, 0.0, 0.0);                        //_M01C
+                startafk();
             }
         }
         else if (!afk)
         {
             if(!winddown && !collapsed)
             {
-                winddown = 1;
-                llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);                    //_M01C
+                stopafk();
             }
         }                                        //_M01B /\
      }
@@ -788,45 +831,14 @@ default
             }
             else if (choice == "start afk")
             {
-                llSetText("afk", <1,1,1>, 2);
-                winddown = FALSE;
-                llTargetOmega(ZERO_VECTOR, 0.0, 0.0);                    //_M01C
-                llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,tplure=n,sittp=n,standtp=n,accepttp=n,unsit=n,sit=n");
+                startafk();
                 afk = TRUE;
             }
             else if (choice == "stop afk")
             {
-                if (currentstate != "Regular")
-                {
-                    llSetText(currentstate, <1,1,1>, 2);
-                }
-                else
-                {
-                    llSetText("", <1,1,1>, 2);
-                }
-                winddown = TRUE;
-                llTargetOmega(<0.0, 0.0, 1.0>, 3.0, 1.0);                //_M01C \/
-                llSleep(2.0);
-                llTargetOmega(<0.0, 0.0, 1.0>, 2.0, 1.0);
-                llSleep(1.0);
-                llTargetOmega(<0.0, 0.0, 1.0>, 1.0, 1.0);
-                llSleep(1.0);
-                llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);                //_M01C /\
+                stopafk();
                 afk = FALSE;
                 timeleftonkey =  timeleftonkey / 2;
-                if (canfly)
-                {
-                    llOwnerSay("@fly=y");
-                }
-                if (!stuck)
-                {
-                    llOwnerSay("@tplm=y,tploc=y");
-                }
-                if (!alwaysavailable)
-                {
-                    llOwnerSay("@accepttp=y");
-                }
-                llOwnerSay("@temprun=y,alwaysrun=y,sendchat=y,tplure=y,sittp=y,standtp=y,unsit=y,sit=y");
             }
             else if (choice == "Turn off Sign")
             {
