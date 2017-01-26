@@ -1,4 +1,4 @@
-//_170126 CH02
+//_170126 CH03
 //_
 //_. M01: on AFK:
 //_      ?A: (vs.AFK lockdown)turn AFK mode on, without halving the remaining time
@@ -14,6 +14,7 @@
 //_
 //_. CH01: Capitalization of doll types
 //_. CH02: collapse() update
+//_. CH03: Key shouldn't wind if dolly is collapsed
 //_
 //_- (vs.using no script parcels to unlock)+ANS
 //_
@@ -525,7 +526,7 @@ default {
           winddown = 0;
           llTargetOmega(ZERO_VECTOR, 0.0, 0.0);                        //_M01C
         }} else if(!afk) {
-         if(!winddown) {
+         if(!winddown && !collapsed) {
           winddown = 1;
           llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);                    //_M01C
         }}                                        //_M01B /\
