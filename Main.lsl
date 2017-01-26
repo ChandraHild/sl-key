@@ -1,4 +1,4 @@
-//_170126 CH04
+//_170126 CH07
 //_
 //_. M01: on AFK:
 //_      ?A: (vs.AFK lockdown)turn AFK mode on, without halving the remaining time
@@ -18,6 +18,7 @@
 //_. CH04: Don't uncarry on logon if our owner was carrying us
 //_. CH05: Set Muniki as Chandra's owner when the script resets
 //_. CH06: Make startafk and stopafk functions
+//_. CH07: Allow unsitting while AFK, make dolly collapse if she unsits while unwound
 //_
 //_- (vs.using no script parcels to unlock)+ANS
 //_
@@ -155,6 +156,7 @@ handlemenuchoices(string choice, string name, key ToucherID)
             llStopAnimation("collapse");
             llReleaseControls();
             aochange("on");
+            llSleep(0.1);
         }
         llSay( 0, " -- " + name + " has given " + dollname + " 30 minutes of life.");
     }
@@ -311,7 +313,7 @@ startafk()
     llSetText("afk", <1,1,1>, 2);
     winddown = FALSE;
     llTargetOmega(ZERO_VECTOR, 0.0, 0.0);                    //_M01C
-    llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,tplure=n,sittp=n,standtp=n,accepttp=n,unsit=n,sit=n");
+    llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,tplure=n,sittp=n,standtp=n,accepttp=n,sit=n");
 }
 
 stopafk()
@@ -345,12 +347,12 @@ stopafk()
     {
         llOwnerSay("@accepttp=y");
     }
-    llOwnerSay("@temprun=y,alwaysrun=y,sendchat=y,tplure=y,sittp=y,standtp=y,unsit=y,sit=y");
+    llOwnerSay("@temprun=y,alwaysrun=y,sendchat=y,tplure=y,sittp=y,standtp=y,sit=y");
 }
 
 collapse()
 {
-    llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,sittp=n,standtp=n,accepttp=n,accepttp:" + (string) carrierID + "=add,accepttp:" + (string) mainwinder + "=add,accepttp:" + (string) MistressID + "=add,unsit=n,sit=n,shownames=n,showhovertextall=n");
+    llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,sittp=n,standtp=n,accepttp=n,accepttp:" + (string) carrierID + "=add,accepttp:" + (string) mainwinder + "=add,accepttp:" + (string) MistressID + "=add,sit=n,shownames=n,showhovertextall=n");
     //_M03A_llOwnerSay("@unsit=force"); // to get me off of pole? Does it stop dancing too?
     llOwnerSay("@tplure=n,tplure:" + (string) mainwinder + "=add,tplure:" + (string) MistressID + "=add");
     //_newanimation = "collapse";                            //_M03B \/
@@ -695,20 +697,30 @@ default
                 }
             }
         }
-        if (llGetAgentInfo(dollID) & AGENT_AWAY) //_M01B \/
+        if (!collapsed)
         {
-            if (winddown)
+            if (llGetAgentInfo(dollID) & AGENT_AWAY) //_M01B \/
             {
-                startafk();
+                if (winddown)
+                {
+                    startafk();
+                }
             }
-        }
-        else if (!afk)
-        {
-            if(!winddown && !collapsed)
+            else if (!afk && !winddown)
             {
                 stopafk();
+            }                                 //_M01B /\
+        }
+        else
+        {
+            if(!(llGetAgentInfo(dollID) & AGENT_SITTING) && currentanimation == "away")
+            {
+                llStopAnimation(currentanimation);
+                llSleep(0.1);
+                newanimation = "collapse";
+                llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
             }
-        }                                        //_M01B /\
+        }
      }
 
      link_message(integer source, integer num, string choice, key id)
@@ -969,6 +981,7 @@ default
             if (pose && llStringLength(currentanimation) > 0)
             {
                 llStopAnimation(currentanimation);
+                llSleep(0.1);
             }
             aochange("off");
             llStartAnimation(newanimation);
