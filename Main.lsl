@@ -1,26 +1,29 @@
 //_170126 CH07
 //_
-//_. M01: on AFK:
-//_      ?A: (vs.AFK lockdown)turn AFK mode on, without halving the remaining time
-//_       B: stop winddown
-//_       C: dynamic TOmega
-//_. M02: options menu: reopen after choosing one
-//_. M03: unwind while sitting:
-//_       A: no unsit
-//_       B: AFK anim.
-//_. M04: winder script vs. dynamic dialog channel:
-//_       A: if touched by 'mistress', send channel (-60946337, 'wind channel|[chn]')
-//_       B: touch_start: -> _end
-//_
-//_. CH01: Capitalization of doll types
-//_. CH02: collapse() update
-//_. CH03: Key shouldn't wind if dolly is collapsed
+//_+ M01 : on AFK:
+//_        A: (CH06) turn AFK mode on, without halving the remaining time
+//_        B: stop winddown
+//_        C: dynamic TOmega
+//_+ M02 : options menu: reopen after choosing one
+//_+ M03 : unwind while sitting:
+//_        A: no unsit
+//_        B: AFK anim.
+//_+ M04 : winder script vs. dynamic dialog channel:
+//_        A: if touched by 'mistress', send channel (-60946337, 'wind channel|[chn]')
+//_        B: touch_start: -> _end
+//_+ CH01: Capitalization of doll types
+//_+ CH02: collapse() update
+//_+ CH03: (M01B) Key shouldn't wind if dolly is collapsed
 //_. CH04: Don't uncarry on logon if our owner was carrying us
-//_. CH05: Set Muniki as Chandra's owner when the script resets
-//_. CH06: Make startafk and stopafk functions
-//_. CH07: Allow unsitting while AFK, make dolly collapse if she unsits while unwound
+//_♥ CH05: Set Muniki as Chandra's owner when the script resets
+//_+ CH06: Make startafk and stopafk functions
+//_+ CH07: Allow unsitting while AFK, make dolly collapse if she unsits while unwound
 //_
-//_- (vs.using no script parcels to unlock)+ANS
+//_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
+//_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
+//_  people might not know she needs wound. Maybe we should get rid of the unsit, so Chandra can
+//_  unsit herself when unwound?"
+//_x (vs. existing code: stand alone)+ANS
 //_
 string optiondate = "Aug. 31";
 //has afk, turns off ZHAO
@@ -137,7 +140,7 @@ handlemenuchoices(string choice, string name, key ToucherID)
             //_M01C_llTargetOmega(<0,0,1>,.3,1.0);
             if (winddown)
             {
-                llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);            //_M01C
+                llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);                        //_M01C
             }
             if (canfly)
             {
@@ -312,7 +315,7 @@ startafk()
     // CH06
     llSetText("afk", <1,1,1>, 2);
     winddown = FALSE;
-    llTargetOmega(ZERO_VECTOR, 0.0, 0.0);                    //_M01C
+    llTargetOmega(ZERO_VECTOR, 0.0, 0.0);                                    //_M01C
     llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,tplure=n,sittp=n,standtp=n,accepttp=n,sit=n");
 }
 
@@ -327,13 +330,13 @@ stopafk()
         llSetText("", <1,1,1>, 2);
     }
     winddown = TRUE;
-    llTargetOmega(<0.0, 0.0, 1.0>, 3.0, 1.0);                //_M01C \/
+    llTargetOmega(<0.0, 0.0, 1.0>, 3.0, 1.0);                                //_M01C \/
     llSleep(2.0);
     llTargetOmega(<0.0, 0.0, 1.0>, 2.0, 1.0);
     llSleep(1.0);
     llTargetOmega(<0.0, 0.0, 1.0>, 1.0, 1.0);
     llSleep(1.0);
-    llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);                //_M01C /\
+    llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);                                //_M01C /\
 
     if (canfly)
     {
@@ -355,14 +358,14 @@ collapse()
     llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,sittp=n,standtp=n,accepttp=n,accepttp:" + (string) carrierID + "=add,accepttp:" + (string) mainwinder + "=add,accepttp:" + (string) MistressID + "=add,sit=n,shownames=n,showhovertextall=n");
     //_M03A_llOwnerSay("@unsit=force"); // to get me off of pole? Does it stop dancing too?
     llOwnerSay("@tplure=n,tplure:" + (string) mainwinder + "=add,tplure:" + (string) MistressID + "=add");
-    //_newanimation = "collapse";                            //_M03B \/
+    //_newanimation = "collapse";                                            //_M03B \/
     if(!(llGetAgentInfo(dollID) & AGENT_SITTING))
     {
         newanimation = "collapse";
     }
     else
     {
-        newanimation = "away";        //_M03B /\
+        newanimation = "away";                                    //_M03B /\
     }
 
     if (pose)
@@ -560,7 +563,7 @@ default
 
     touch_end(integer total_number)
     {
-        //_M04B
+        //*_M04B
         integer displaytime = (integer) ((timeleftonkey+5) / 6);
         string timeleft = "Time Left on key is " + (string)displaytime + " minutes. ";
         key ToucherID = llDetectedKey(0);  //detects user UUID
@@ -647,7 +650,7 @@ default
         if ((ToucherID == MistressID || ToucherID == ChristinaID) && ToucherID != dollID)
         {
             menu += ["Carry","Use Control"];
-            llWhisper(-60946337, "wind channel|" + (string)channel_dialog);        //_M04A
+            llWhisper(-60946337, "wind channel|" + (string)channel_dialog);            //_M04A
         }
         llDialog(ToucherID, timeleft + msg,  menu, channel_dialog);
     }
@@ -699,7 +702,7 @@ default
         }
         if (!collapsed)
         {
-            if (llGetAgentInfo(dollID) & AGENT_AWAY) //_M01B \/
+            if (llGetAgentInfo(dollID) & AGENT_AWAY)                     //_M01B \/
             {
                 if (winddown)
                 {
@@ -709,7 +712,7 @@ default
             else if (!afk && !winddown)
             {
                 stopafk();
-            }                                 //_M01B /\
+            }                                                         //_M01B /\
         }
         else
         {
@@ -856,7 +859,7 @@ default
             {
                    llSetText("", <1,1,1>, 2);
             }
-            handlemenuchoices("Options", name, id);                    //_M02
+            handlemenuchoices("Options", name, id);                                //_M02
         }
 
         else if (channel == 6011 && choice == "detach")
