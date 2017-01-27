@@ -1,4 +1,4 @@
-//_170126 CH08
+//_170126 CH10
 //_
 //_+ M01 : on AFK:
 //_        A: (CH06) turn AFK mode on, without halving the remaining time
@@ -19,6 +19,8 @@
 //_+ CH06: Make startafk and stopafk functions
 //_+ CH07: Allow unsitting while AFK, make dolly collapse if she unsits while unwound
 //_+ CH08: Add ANS
+//_+ CH09: Remove hover text, put in menu
+//_+ CH10: Show current outfit in outfit list
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -303,10 +305,6 @@ handlemenuchoices(string choice, string name, key ToucherID)
         {
             pluslist += "Visible";
         }
-        if (cantransform)
-        {
-            pluslist += "Turn off Sign";
-        }
         llDialog(ToucherID,msg,pluslist , cd5666);
     }
 }
@@ -314,7 +312,6 @@ handlemenuchoices(string choice, string name, key ToucherID)
 startafk()
 {
     // CH06
-    llSetText("afk", <1,1,1>, 2);
     winddown = FALSE;
     llTargetOmega(ZERO_VECTOR, 0.0, 0.0);                                    //_M01C
     llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,tplure=n,sittp=n,standtp=n,accepttp=n,sit=n");
@@ -322,14 +319,6 @@ startafk()
 
 stopafk()
 {
-    if (currentstate != "Regular")
-    {
-        llSetText(currentstate, <1,1,1>, 2);
-    }
-    else
-    {
-        llSetText("", <1,1,1>, 2);
-    }
     winddown = TRUE;
     llTargetOmega(<0.0, 0.0, 1.0>, 3.0, 1.0);                                //_M01C \/
     llSleep(2.0);
@@ -627,7 +616,7 @@ default
             //not  being carried, not collapsed
             if (ToucherID == dollID)
             {
-                msg = httpstart + "dollkeyselfinfo.htm";
+                msg = httpstart + "dollkeyselfinfo.htm\nYou are a " + currentstate + " doll.";
                 menu = ["Dress","Options"];
                 if (!pose)
                 {
@@ -640,7 +629,11 @@ default
             }
             else
             {
-                msg = dollname + " is a doll and likes to be treated like a doll. So feel free to use these options. The Carry option picks up " + dollname + " and temporarily makes her exclusively yours. " + httpstart + "communitydoll.htm for more info" ;
+                msg = dollname + " is a " + currentstate + " doll and likes to be treated like a doll. So feel free to use these options. The Carry option picks up " + dollname + " and temporarily makes her exclusively yours. " + httpstart + "communitydoll.htm for more info.";
+                if (afk || llGetAgentInfo(dollID) & AGENT_AWAY)
+                {
+                    msg += " She is currently marked AFK.";
+                }
                 menu += "Carry";
                 if (pose)
                 {
@@ -861,10 +854,6 @@ default
                 stopafk();
                 afk = FALSE;
                 timeleftonkey =  timeleftonkey / 2;
-            }
-            else if (choice == "Turn off Sign")
-            {
-                   llSetText("", <1,1,1>, 2);
             }
             handlemenuchoices("Options", name, id);                                //_M02
         }

@@ -242,14 +242,6 @@ default
             llMessageLinked( -4, 1, "random", id);
             llMessageLinked( -4, 16, currentstate, dollID);
             llSay(0, dollname + " has become a " + statename + " Doll.");
-            if (currentstate != "Regular")
-            {
-                   llSetText(statename + " Doll", <1,1,1>, 2);
-            }
-            else
-            {
-                   llSetText("", <1,1,1>, 2);
-            }
         }
 
         else if (channel == cd8666+1)

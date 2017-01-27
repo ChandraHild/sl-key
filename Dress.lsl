@@ -85,7 +85,7 @@ dressmenu(string choice)
     for (n = 0; n < iStop; n++)
     {
         itemname = llList2String(Outfits, n);
-        if (llGetSubString(itemname,0,0) != "~"  && llGetSubString(itemname,0,0) != "*"&& itemname != oldoutfitname)
+        if (llGetSubString(itemname,0,0) != "~"  && llGetSubString(itemname,0,0) != "*")
         {
             newoutfits += itemname;
         }
