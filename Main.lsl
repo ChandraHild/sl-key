@@ -1,4 +1,4 @@
-//_170126 CH07
+//_170126 CH08
 //_
 //_+ M01 : on AFK:
 //_        A: (CH06) turn AFK mode on, without halving the remaining time
@@ -18,6 +18,7 @@
 //_♥ CH05: Set Muniki as Chandra's owner when the script resets
 //_+ CH06: Make startafk and stopafk functions
 //_+ CH07: Allow unsitting while AFK, make dolly collapse if she unsits while unwound
+//_+ CH08: Add ANS
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -117,8 +118,8 @@ handlemenuchoices(string choice, string name, key ToucherID)
                llStopAnimation(currentanimation);  //Nice if this was called only if there was an animation, especially nice not to end belly
             }
             currentanimation = "";
-            llReleaseControls();
             pose = FALSE;
+            llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
             aochange("on");
         }
     }
@@ -157,9 +158,9 @@ handlemenuchoices(string choice, string name, key ToucherID)
             llOwnerSay("@temprun=y,alwaysrun=y,sendchat=y,tplure=y,sittp=y,standtp=y,unsit=y,sit=y,shownames=y,showhovertextall=y,rediremote:999=rem");
             collapsed = FALSE;
             llStopAnimation("collapse");
-            llReleaseControls();
-            aochange("on");
             llSleep(0.1);
+            llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
+            aochange("on");
         }
         llSay( 0, " -- " + name + " has given " + dollname + " 30 minutes of life.");
     }
@@ -374,12 +375,12 @@ collapse()
         llStopAnimation(currentanimation);
         llSleep(0.1);
     }
-    llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
 
     llOwnerSay("@rediremote:999=add");
     llTargetOmega(ZERO_VECTOR, 0, 0);
     collapsed = TRUE;
     visible = TRUE;
+    llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
     llSetLinkAlpha(LINK_SET, 1.0, ALL_SIDES);
 }
 
@@ -481,6 +482,7 @@ setup()
     if (llGetAttached() == ATTACH_BACK) // 9 is spine, the proper location for the key
     {
         llOwnerSay("@detach=n");  //locks key
+        llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
     }
     else
     {
@@ -675,9 +677,10 @@ default
                 if (posetime == 0)
                 {
                     llStopAnimation(currentanimation);
-                    llReleaseControls();
                     pose = FALSE;
                     currentanimation = "";
+                    llSleep(0.1);
+                    llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
                     aochange("on");
                 }
             }
@@ -737,8 +740,12 @@ default
             if (currentstate == "Display")
             {
                 llStopAnimation(currentanimation);  //Nice if this was called only if there was an animation, especially nice not to end belly
-                llReleaseControls();
                 pose = FALSE;
+                llSleep(0.1);
+                if (choice != "Display")
+                {
+                    llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
+                }
                 aochange("on");
             }
             //changes over to current state being new state
@@ -986,15 +993,19 @@ default
                 llStopAnimation(currentanimation);
                 llSleep(0.1);
             }
-            aochange("off");
-            llStartAnimation(newanimation);
-            currentanimation = newanimation;
-            pose = TRUE;
+            if (llStringLength(newanimation) > 0)
+            {
+                aochange("off");
+                llStartAnimation(newanimation);
+                currentanimation = newanimation;
+                newanimation = "";
+                pose = TRUE;
+            }
         }
         if (perm & PERMISSION_TAKE_CONTROLS)
         {
             llTakeControls( CONTROL_FWD | CONTROL_BACK | CONTROL_LEFT | CONTROL_RIGHT | CONTROL_ROT_LEFT |
-                         CONTROL_ROT_RIGHT | CONTROL_UP |  CONTROL_DOWN | CONTROL_LBUTTON | CONTROL_ML_LBUTTON , TRUE, FALSE);
+                            CONTROL_ROT_RIGHT | CONTROL_UP |  CONTROL_DOWN | CONTROL_LBUTTON, TRUE, !(pose || collapsed));
         }
     }
 }
