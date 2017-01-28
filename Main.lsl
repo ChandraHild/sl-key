@@ -1,4 +1,4 @@
-//_170127 CH12
+//_170128 M05
 //_
 //_+ M01 : on AFK:
 //_        A: (CH06) turn AFK mode on, without halving the remaining time
@@ -14,7 +14,7 @@
 //_+ CH01: Capitalization of doll types
 //_+ CH02: collapse() update
 //_+ CH03: (M01B) Key shouldn't wind if dolly is collapsed
-//_. CH04: Don't uncarry on logon if our owner was carrying us
+//_+ CH04: Don't uncarry on logon if our owner was carrying us
 //_♥ CH05: Set Muniki as Chandra's owner when the script resets
 //_+ CH06: Make startafk and stopafk functions
 //_+ CH07: Allow unsitting while AFK, make dolly collapse if she unsits while unwound
@@ -23,6 +23,8 @@
 //_+ CH10: Show current outfit in outfit list
 //_+ CH11: Unpose after winding an unwound dolly!
 //_+ CH12: Turn off AO for display dollies
+//_. M05 : A: (M01C) dynamic spin: +winding
+//_        B: +sound
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -145,7 +147,7 @@ handlemenuchoices(string choice, string name, key ToucherID)
             //_M01C_llTargetOmega(<0,0,1>,.3,1.0);
             if (winddown)
             {
-                llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);                        //_M01C
+                llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);                            //_M01C
             }
             if (canfly)
             {
@@ -176,6 +178,7 @@ handlemenuchoices(string choice, string name, key ToucherID)
             llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
         }
         llSay( 0, " -- " + name + " has given " + dollname + " 30 minutes of life.");
+        M05(3);                                        //_M05A
     }
 
     else if (choice == "Dress")
@@ -324,20 +327,20 @@ startafk()
 {
     // CH06
     winddown = FALSE;
-    llTargetOmega(ZERO_VECTOR, 0.0, 0.0);                                    //_M01C
+    llTargetOmega(ZERO_VECTOR, 0.0, 0.0);                                            //_M01C
     llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,tplure=n,sittp=n,standtp=n,accepttp=n,sit=n");
 }
 
 stopafk()
 {
     winddown = TRUE;
-    llTargetOmega(<0.0, 0.0, 1.0>, 3.0, 1.0);                                //_M01C \/
+    llTargetOmega(<0.0, 0.0, 1.0>, 3.0, 1.0);                                        //_M01C \/
     llSleep(2.0);
     llTargetOmega(<0.0, 0.0, 1.0>, 2.0, 1.0);
     llSleep(1.0);
     llTargetOmega(<0.0, 0.0, 1.0>, 1.0, 1.0);
     llSleep(1.0);
-    llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);                                //_M01C /\
+    llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);                                        //_M01C /\
 
     if (canfly)
     {
@@ -359,14 +362,14 @@ collapse()
     llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,sittp=n,standtp=n,accepttp=n,accepttp:" + (string) carrierID + "=add,accepttp:" + (string) mainwinder + "=add,accepttp:" + (string) MistressID + "=add,sit=n,shownames=n,showhovertextall=n");
     //_M03A_llOwnerSay("@unsit=force"); // to get me off of pole? Does it stop dancing too?
     llOwnerSay("@tplure=n,tplure:" + (string) mainwinder + "=add,tplure:" + (string) MistressID + "=add");
-    //_newanimation = "collapse";                                            //_M03B \/
+    //_newanimation = "collapse";                                                    //_M03B \/
     if(!(llGetAgentInfo(dollID) & AGENT_SITTING))
     {
         newanimation = "collapse";
     }
     else
     {
-        newanimation = "away";                                    //_M03B /\
+        newanimation = "away";                                                //_M03B /\
     }
 
     if (pose)
@@ -530,6 +533,22 @@ setup()
     }
 }
 
+M05(integer i) {                                    //_M05A \/
+ if(i < 1) return;
+ llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 0.0);
+ llSleep(0.5);
+ do {
+  llSound("07af5599-8529-fb12-5891-1dcf1a33ee49", 1.0, 0, 1);                //_M05B
+  //       '- [Muniki K[_Clock Key Winding Up, Free Sound Effects (YTube)]
+  llTargetOmega(<0.0, 0.0,-1.0>, TWO_PI/6.0/0.5, 1.0);
+  llSleep(0.5);  //              '- 60o in 0.5s
+  llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 0.0);
+  llSleep(0.5);
+  i--;
+ } while(i);
+ if(winddown) llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);
+}                                            //_M05A /\
+
 default
 {
     state_entry()
@@ -565,7 +584,7 @@ default
 
     touch_end(integer total_number)
     {
-        //*_M04B
+        //_M04B
         integer displaytime = (integer) ((timeleftonkey+5) / 6);
         string timeleft = "Time Left on key is " + (string)displaytime + " minutes. ";
         key ToucherID = llDetectedKey(0);  //detects user UUID
@@ -656,7 +675,7 @@ default
         if ((ToucherID == MistressID || ToucherID == ChristinaID) && ToucherID != dollID)
         {
             menu += ["Carry","Use Control"];
-            llWhisper(-60946337, "wind channel|" + (string)channel_dialog);            //_M04A
+            llWhisper(-60946337, "wind channel|" + (string)channel_dialog);                //_M04A
         }
         llDialog(ToucherID, timeleft + msg,  menu, channel_dialog);
     }
@@ -709,7 +728,7 @@ default
         }
         if (!collapsed)
         {
-            if (llGetAgentInfo(dollID) & AGENT_AWAY)                     //_M01B \/
+            if (llGetAgentInfo(dollID) & AGENT_AWAY)                             //_M01B \/
             {
                 if (winddown)
                 {
@@ -719,7 +738,7 @@ default
             else if (!afk && !winddown)
             {
                 stopafk();
-            }                                                         //_M01B /\
+            }                                                                     //_M01B /\
         }
         else
         {
@@ -867,7 +886,7 @@ default
                 afk = FALSE;
                 timeleftonkey =  timeleftonkey / 2;
             }
-            handlemenuchoices("Options", name, id);                                //_M02
+            handlemenuchoices("Options", name, id);                                    //_M02
         }
 
         else if (channel == 6011 && choice == "detach")
