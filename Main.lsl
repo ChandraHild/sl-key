@@ -178,7 +178,7 @@ handlemenuchoices(string choice, string name, key ToucherID)
             llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
         }
         llSay( 0, " -- " + name + " has given " + dollname + " 30 minutes of life.");
-        M05(3);                                        //_M05A
+        windanimate(3);                                        //_M05A
     }
 
     else if (choice == "Dress")
@@ -533,20 +533,28 @@ setup()
     }
 }
 
-M05(integer i) {                                    //_M05A \/
- if(i < 1) return;
- llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 0.0);
- llSleep(0.5);
- do {
-  llSound("07af5599-8529-fb12-5891-1dcf1a33ee49", 1.0, 0, 1);                //_M05B
-  //       '- [Muniki K[_Clock Key Winding Up, Free Sound Effects (YTube)]
-  llTargetOmega(<0.0, 0.0,-1.0>, TWO_PI/6.0/0.5, 1.0);
-  llSleep(0.5);  //              '- 60o in 0.5s
-  llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 0.0);
-  llSleep(0.5);
-  i--;
- } while(i);
- if(winddown) llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);
+windanimate(integer i)
+{                                    //_M05A \/
+    if (i < 1)
+    {
+        return;
+    }
+    llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 0.0);
+    llSleep(0.5);
+    do
+    {
+        llSound("07af5599-8529-fb12-5891-1dcf1a33ee49", 1.0, 0, 1);                //_M05B
+        //       '- [Muniki K[_Clock Key Winding Up, Free Sound Effects (YTube)]
+        llTargetOmega(<0.0, 0.0,-1.0>, TWO_PI/6.0/0.5, 1.0);
+        llSleep(0.5);  //              '- 60o in 0.5s
+        llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 0.0);
+        llSleep(0.5);
+        i--;
+    } while (i);
+    if (winddown)
+    {
+        llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);
+    }
 }                                            //_M05A /\
 
 default
