@@ -1,4 +1,4 @@
-//_170126 CH10
+//_170127 CH11
 //_
 //_+ M01 : on AFK:
 //_        A: (CH06) turn AFK mode on, without halving the remaining time
@@ -21,6 +21,7 @@
 //_+ CH08: Add ANS
 //_+ CH09: Remove hover text, put in menu
 //_+ CH10: Show current outfit in outfit list
+//_+ CH11: Unpose after winding an unwound dolly!
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -159,10 +160,19 @@ handlemenuchoices(string choice, string name, key ToucherID)
             }
             llOwnerSay("@temprun=y,alwaysrun=y,sendchat=y,tplure=y,sittp=y,standtp=y,unsit=y,sit=y,shownames=y,showhovertextall=y,rediremote:999=rem");
             collapsed = FALSE;
+            pose = FALSE;
             llStopAnimation("collapse");
             llSleep(0.1);
+            if (currentstate == "Display")
+            {
+                posetime = poselimit;
+                newanimation = "beautystand";
+            }
+            else
+            {
+                aochange("on");
+            }
             llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
-            aochange("on");
         }
         llSay( 0, " -- " + name + " has given " + dollname + " 30 minutes of life.");
     }
@@ -263,12 +273,12 @@ handlemenuchoices(string choice, string name, key ToucherID)
             pluslist += "start afk";
         }
 
-        if (alwaysavailable)
+        if (!alwaysavailable)
         {
             pluslist += "automatic tp";
         }
 
-        if (stuck)
+        if (!stuck)
         {
             pluslist += "no self tp";
         }
