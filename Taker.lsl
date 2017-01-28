@@ -28,7 +28,7 @@ default
 
     on_rez(integer iParam)
     {
-        //when key is put on, or when logging back on
+        // When key is put on, or when logging back on
         setup();
     }
 

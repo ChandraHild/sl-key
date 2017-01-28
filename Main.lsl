@@ -1,4 +1,4 @@
-//_170128 M05
+//_170128 CH13
 //_
 //_+ M01 : on AFK:
 //_        A: (CH06) turn AFK mode on, without halving the remaining time
@@ -22,9 +22,10 @@
 //_+ CH09: Remove hover text, put in menu
 //_+ CH10: Show current outfit in outfit list
 //_+ CH11: Unpose after winding an unwound dolly!
-//_+ CH12: Turn off AO for display dollies
+//_. CH12: Turn off AO for display dollies
 //_. M05 : A: (M01C) dynamic spin: +winding
 //_        B: +sound
+//_+ CH13: Make code style consistent
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -100,7 +101,7 @@ handlemenuchoices(string choice, string name, key ToucherID)
             llOwnerSay("@accepttp=rem");
         }
         llOwnerSay("@tplm=n,tploc=n,tplure=n,tplure:" + (string) carrierID + "=add,accepttp:" + (string) carrierID + "=add,accepttp:" + (string) MistressID + "=add");
-        llSay( 0, dollname + " has been picked up by " + carriername);
+        llSay(0, dollname + " has been picked up by " + carriername);
     }
     else if (choice == "Place Down")
     {
@@ -108,7 +109,7 @@ handlemenuchoices(string choice, string name, key ToucherID)
     }
     else if (choice == "Type of Doll")
     {
-        llMessageLinked( -4, 17, name, ToucherID );
+        llMessageLinked(-4, 17, name, ToucherID);
     }
     else if (choice == "Pose")
     {
@@ -121,7 +122,8 @@ handlemenuchoices(string choice, string name, key ToucherID)
         {
             if (currentanimation != "")
             {
-               llStopAnimation(currentanimation);  //Nice if this was called only if there was an animation, especially nice not to end belly
+                // Nice if this was called only if there was an animation, especially nice not to end belly
+                llStopAnimation(currentanimation);
             }
             currentanimation = "";
             pose = FALSE;
@@ -139,15 +141,17 @@ handlemenuchoices(string choice, string name, key ToucherID)
         if (timeleftonkey > keylimit)
         {
             timeleftonkey = keylimit;
-            llSay( 0, dollname + "'s time has reached her limit");
+            llSay(0, dollname + "'s time has reached her limit");
         }
-        if (collapsed) //uncollapsing
+        if (collapsed)
         {
+            // Uncollapsing
             timeleftonkey = windamount;
             //_M01C_llTargetOmega(<0,0,1>,.3,1.0);
             if (winddown)
             {
-                llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);                            //_M01C
+                //_M01C
+                llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);
             }
             if (canfly)
             {
@@ -177,13 +181,15 @@ handlemenuchoices(string choice, string name, key ToucherID)
             }
             llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
         }
-        llSay( 0, " -- " + name + " has given " + dollname + " 30 minutes of life.");
-        windanimate(3);                                        //_M05A
+        llSay(0, " -- " + name + " has given " + dollname + " 30 minutes of life.");
+
+        //_M05A
+        windanimate(3);
     }
 
     else if (choice == "Dress")
     {
-        llMessageLinked( -4, 1, "start", ToucherID );
+        llMessageLinked(-4, 1, "start", ToucherID);
         llOwnerSay(name + " is looking at your dress menu");
     }
 
@@ -197,7 +203,7 @@ handlemenuchoices(string choice, string name, key ToucherID)
         canbecomemistress = FALSE;
         hascontroller = TRUE;
         MistressID = ToucherID;
-        llOwnerSay( "The person carrying you has taken over as your controller.");
+        llOwnerSay("The person carrying you has taken over as your controller.");
         string msg = "You are now " + dollname + "'s controller. See " + httpstart + "controller.htm";
         llDialog(ToucherID,msg,["OK"] , 9999);
     }
@@ -245,7 +251,8 @@ handlemenuchoices(string choice, string name, key ToucherID)
         {
             privatemenu += "no flying";
         }
-        else {
+        else
+        {
             privatemenu += "can fly";
         }
         llDialog(ToucherID, "See " + httpstart + "controller.htm Choose what you want to happen",  privatemenu, cd6012);
@@ -327,20 +334,25 @@ startafk()
 {
     // CH06
     winddown = FALSE;
-    llTargetOmega(ZERO_VECTOR, 0.0, 0.0);                                            //_M01C
+
+    //_M01C
+    llTargetOmega(ZERO_VECTOR, 0.0, 0.0);
     llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,tplure=n,sittp=n,standtp=n,accepttp=n,sit=n");
 }
 
 stopafk()
 {
     winddown = TRUE;
-    llTargetOmega(<0.0, 0.0, 1.0>, 3.0, 1.0);                                        //_M01C \/
+
+    //_M01C \/
+    llTargetOmega(<0.0, 0.0, 1.0>, 3.0, 1.0);
     llSleep(2.0);
     llTargetOmega(<0.0, 0.0, 1.0>, 2.0, 1.0);
     llSleep(1.0);
     llTargetOmega(<0.0, 0.0, 1.0>, 1.0, 1.0);
     llSleep(1.0);
-    llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);                                        //_M01C /\
+    llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);
+    //_M01C /\
 
     if (canfly)
     {
@@ -362,15 +374,17 @@ collapse()
     llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,sittp=n,standtp=n,accepttp=n,accepttp:" + (string) carrierID + "=add,accepttp:" + (string) mainwinder + "=add,accepttp:" + (string) MistressID + "=add,sit=n,shownames=n,showhovertextall=n");
     //_M03A_llOwnerSay("@unsit=force"); // to get me off of pole? Does it stop dancing too?
     llOwnerSay("@tplure=n,tplure:" + (string) mainwinder + "=add,tplure:" + (string) MistressID + "=add");
-    //_newanimation = "collapse";                                                    //_M03B \/
+
+    //_M03B \/
     if(!(llGetAgentInfo(dollID) & AGENT_SITTING))
     {
         newanimation = "collapse";
     }
     else
     {
-        newanimation = "away";                                                //_M03B /\
+        newanimation = "away";
     }
+    //_M03B /\
 
     if (pose)
     {
@@ -466,10 +480,12 @@ setup()
         cantransform = FALSE;
         winddown = TRUE;
         afk = FALSE;
-        if (dollID == "27f02017-bf33-49f9-b7b9-9317b7791fc0") // CH05 Set Muniki as owner if we're Chandra!
+        if (dollID == "27f02017-bf33-49f9-b7b9-9317b7791fc0")
         {
+            // CH05 Set Muniki as owner if we're Chandra!
             hascontroller = TRUE;
-            MistressID = "ac80e0b5-04ab-44a9-8a79-2d85c85da247"; // Muniki's ID
+            // Muniki's ID
+            MistressID = "ac80e0b5-04ab-44a9-8a79-2d85c85da247";
         }
         else
         {
@@ -477,14 +493,15 @@ setup()
             MistressID = ChristinaID;
         }
         timeleftonkey = 180; 
-        llMessageLinked( -4, 200, "start", dollID );
+        llMessageLinked(-4, 200, "start", dollID);
         visible = TRUE;
         currentstate = "Regular";
     }
     dollname = llGetDisplayName(dollID);
-    if (llGetAttached() == ATTACH_BACK) // 9 is spine, the proper location for the key
+    if (llGetAttached() == ATTACH_BACK)
     {
-        llOwnerSay("@detach=n");  //locks key
+        // Locks key
+        llOwnerSay("@detach=n");
         llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
     }
     else
@@ -506,12 +523,12 @@ setup()
         cd6012 = channel_dialog - 6012;
         cd4667 = channel_dialog - 4667;
         cd5666 = channel_dialog - 5666;
-        listen_id_main = llListen( channel_dialog, "", "", "");
-        listen_id_private2 = llListen( cd6012, "", "", "");
-        listen_id_poses = llListen( cd3666, "", "", "");
+        listen_id_main = llListen(channel_dialog, "", "", "");
+        listen_id_private2 = llListen(cd6012, "", "", "");
+        listen_id_poses = llListen(cd3666, "", "", "");
         listen_id_strip = llListen(cd4667, "", "", "");
         listen_id_plus = llListen(cd5666, "", "", "");
-        listen_id_6011 = llListen( 6011, "", "", "");
+        listen_id_6011 = llListen(6011, "", "", "");
     }
 
     llOwnerSay("@acceptpermission=add");
@@ -525,16 +542,19 @@ setup()
     {
         llOwnerSay("@tplm=n,tploc=n");
     }
-    if (!candress) {
-        llOwnerSay( "Other people cannot dress you.");
+    if (!candress)
+    {
+        llOwnerSay("Other people cannot dress you.");
     }
-    if (!canfly) {
-        llOwnerSay( "@fly=n");
+    if (!canfly)
+    {
+        llOwnerSay("@fly=n");
     }
 }
 
+//_M05A \/
 windanimate(integer i)
-{                                    //_M05A \/
+{
     if (i < 1)
     {
         return;
@@ -543,7 +563,8 @@ windanimate(integer i)
     llSleep(0.5);
     do
     {
-        llSound("07af5599-8529-fb12-5891-1dcf1a33ee49", 1.0, 0, 1);                //_M05B
+        //_M05B
+        llSound("07af5599-8529-fb12-5891-1dcf1a33ee49", 1.0, 0, 1);
         //       '- [Muniki K[_Clock Key Winding Up, Free Sound Effects (YTube)]
         llTargetOmega(<0.0, 0.0,-1.0>, TWO_PI/6.0/0.5, 1.0);
         llSleep(0.5);  //              '- 60o in 0.5s
@@ -555,7 +576,8 @@ windanimate(integer i)
     {
         llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);
     }
-}                                            //_M05A /\
+}
+//_M05A /\
 
 default
 {
@@ -564,13 +586,14 @@ default
         llTargetOmega(<0,0,1>,.3,1.0);
         setup();
         reloadscripts();
-        llSetTimerEvent(10.0);  //clock is accessed every ten seconds;
+        // Clock is accessed every ten seconds;
+        llSetTimerEvent(10.0);
         httpstart = "See http://CommunityDolls.com/";
     }
 
     on_rez(integer iParam)
     {
-        // when key is put on, or when logging back on
+        // When key is put on, or when logging back on
         setup();
         if (carried && carrierID != MistressID)
         {
@@ -595,8 +618,12 @@ default
         //_M04B
         integer displaytime = (integer) ((timeleftonkey+5) / 6);
         string timeleft = "Time Left on key is " + (string)displaytime + " minutes. ";
-        key ToucherID = llDetectedKey(0);  //detects user UUID
-        string ToucherName = llDetectedName(0);  //detects user UUID
+
+        // Detects user UUID
+        key ToucherID = llDetectedKey(0);
+
+        // Detects user name
+        string ToucherName = llDetectedName(0);
         string msg;
         list menu =  ["Wind"];
         if (candress)
@@ -651,7 +678,7 @@ default
         }
         else
         {
-            //not  being carried, not collapsed
+            // Not being carried, not collapsed
             if (ToucherID == dollID)
             {
                 msg = httpstart + "dollkeyselfinfo.htm\nYou are a " + currentstate + " doll.";
@@ -683,14 +710,16 @@ default
         if ((ToucherID == MistressID || ToucherID == ChristinaID) && ToucherID != dollID)
         {
             menu += ["Carry","Use Control"];
-            llWhisper(-60946337, "wind channel|" + (string)channel_dialog);                //_M04A
+
+            //_M04A
+            llWhisper(-60946337, "wind channel|" + (string)channel_dialog);
         }
         llDialog(ToucherID, timeleft + msg,  menu, channel_dialog);
     }
 
     timer()
     {
-        //called everytimeinterval
+        // Called every time interval
         if (winddown && !collapsed)
         {
             timeleftonkey -= 1;
@@ -736,7 +765,8 @@ default
         }
         if (!collapsed)
         {
-            if (llGetAgentInfo(dollID) & AGENT_AWAY)                             //_M01B \/
+            //_M01B \/
+            if (llGetAgentInfo(dollID) & AGENT_AWAY)
             {
                 if (winddown)
                 {
@@ -746,7 +776,8 @@ default
             else if (!afk && !winddown)
             {
                 stopafk();
-            }                                                                     //_M01B /\
+            }
+            //_M01B /\
         }
         else
         {
@@ -770,7 +801,9 @@ default
             }
             if (currentstate == "Display")
             {
-                llStopAnimation(currentanimation);  //Nice if this was called only if there was an animation, especially nice not to end belly
+
+                // Nice if this was called only if there was an animation, especially nice not to end belly
+                llStopAnimation(currentanimation);
                 pose = FALSE;
                 llSleep(0.1);
                 if (choice != "Display")
@@ -779,7 +812,8 @@ default
                     aochange("on");
                 }
             }
-            //changes over to current state being new state
+
+            // Changes over to current state being new state
             currentstate = choice;
             if (currentstate == "Display")
             {
@@ -894,7 +928,9 @@ default
                 afk = FALSE;
                 timeleftonkey =  timeleftonkey / 2;
             }
-            handlemenuchoices("Options", name, id);                                    //_M02
+
+            //_M02
+            handlemenuchoices("Options", name, id);
         }
 
         else if (channel == 6011 && choice == "detach")
@@ -1009,7 +1045,6 @@ default
         {
             handlemenuchoices(choice, name, id);
         }
-
     }
 
     run_time_permissions(integer perm)
@@ -1032,8 +1067,8 @@ default
         }
         if (perm & PERMISSION_TAKE_CONTROLS)
         {
-            llTakeControls( CONTROL_FWD | CONTROL_BACK | CONTROL_LEFT | CONTROL_RIGHT | CONTROL_ROT_LEFT |
-                            CONTROL_ROT_RIGHT | CONTROL_UP |  CONTROL_DOWN | CONTROL_LBUTTON, TRUE, !(pose || collapsed));
+            llTakeControls(CONTROL_FWD | CONTROL_BACK | CONTROL_LEFT | CONTROL_RIGHT | CONTROL_ROT_LEFT |
+                           CONTROL_ROT_RIGHT | CONTROL_UP | CONTROL_DOWN | CONTROL_LBUTTON, TRUE, !(pose || collapsed));
         }
     }
 }

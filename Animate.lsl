@@ -72,8 +72,9 @@ default
         setup();
     }
 
-    on_rez(integer iParam) //when key is put on, or when logging back on
+    on_rez(integer iParam)
     {
+        // When key is put on, or when logging back on
         setup();
     }
 
@@ -116,8 +117,8 @@ default
         }
         if (perm & PERMISSION_TAKE_CONTROLS)
         {
-            llTakeControls( CONTROL_FWD | CONTROL_BACK | CONTROL_LEFT | CONTROL_RIGHT | CONTROL_ROT_LEFT |
-                         CONTROL_ROT_RIGHT | CONTROL_UP |  CONTROL_DOWN | CONTROL_LBUTTON | CONTROL_ML_LBUTTON , TRUE, FALSE);
+            llTakeControls(CONTROL_FWD | CONTROL_BACK | CONTROL_LEFT | CONTROL_RIGHT | CONTROL_ROT_LEFT |
+                           CONTROL_ROT_RIGHT | CONTROL_UP |  CONTROL_DOWN | CONTROL_LBUTTON | CONTROL_ML_LBUTTON, TRUE, FALSE);
         }
     }
 }

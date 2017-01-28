@@ -21,7 +21,8 @@ integer channel_dialog;
 integer channelHUD;
 integer channelAsk;
 
-integer menulimit = 9;     // 1.5 minute
+// 1.5 minute
+integer menulimit = 9;
 
 string currentstate;
 integer winddown;
@@ -118,7 +119,7 @@ default
 
     timer()
     {
-        //called everytimeinterval
+        // Called every time interval
         minmin--;
         maxmin--;
         if (maxmin == 0)
@@ -237,10 +238,10 @@ default
             lineno = 0;
             kQuery = llGetNotecardLine(choice,0);
 
-            llMessageLinked( -4, 2, clothingprefix, dollID);
+            llMessageLinked(-4, 2, clothingprefix, dollID);
             llSleep(1.0);
-            llMessageLinked( -4, 1, "random", id);
-            llMessageLinked( -4, 16, currentstate, dollID);
+            llMessageLinked(-4, 1, "random", id);
+            llMessageLinked(-4, 16, currentstate, dollID);
             llSay(0, dollname + " has become a " + statename + " Doll.");
         }
 

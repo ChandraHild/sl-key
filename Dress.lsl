@@ -3,7 +3,8 @@
 //Nov. 25, puts in dress menu
 //Aug 1, redoes closing
 
-string bigsubfolder = "Dressup"; //name of subfolder in RLV to always use if available. But also checks for outfits.
+// Name of subfolder in RLV to always use if available. But also checks for outfits.
+string bigsubfolder = "Dressup";
 
 integer candresstemp;
 integer candresstimeout;
@@ -77,7 +78,7 @@ setup()
 
 dressmenu(string choice)
 {
-    list Outfits = llParseString2List(choice, [","], []); //what are brackets at end?
+    list Outfits = llParseString2List(choice, [","], []);
     newoutfits = [];
     integer n;
     integer iStop = llGetListLength(Outfits);
@@ -97,14 +98,14 @@ dressmenu(string choice)
 
 randomdress(string choice)
 {
-    // gets random outfit
-    list Outfits = llParseString2List(choice, [","], []); //what are brackets at end? 
+    // Gets random outfit
+    list Outfits = llParseString2List(choice, [","], []);
     list newoutfits = [];
     integer n;
     integer iStop = llGetListLength(Outfits);
     if (iStop == 0)
     {
-        //folder is empty, switching to regular folder
+        // Folder is empty, switching to regular folder
         llOwnerSay("There are no outfits in your " + clothingprefix + " folder.");
         if (bigprefix)
         {
@@ -137,7 +138,7 @@ randomdress(string choice)
 
 dressdialog()
 {
-    //picks out
+    // Picks out
     list newoutfits2;
     integer numoutfits = llGetListLength(newoutfits);
     integer curpagesize = pagesize;
@@ -192,7 +193,7 @@ dress(string choice)
     llSleep(5.0);
     if (llGetSubString(oldoutfitname,0,0) == "+" && llGetSubString(newoutfitname,0,0) != "+")
     {
-        // only works well assuming in regular
+        // Only works well assuming in regular
         llOwnerSay("@attach:~normalself=force");
     }
     llOwnerSay("@attachallover:" + newoutfit + "=force");
@@ -209,7 +210,8 @@ default
     {
         channel_dialog = 0;
         setup();
-        llSetTimerEvent(10.0);  //clock is accessed every ten seconds;
+        // Clock is accessed every ten seconds;
+        llSetTimerEvent(10.0);
         clothingprefix = "";
     }
 
@@ -220,7 +222,7 @@ default
 
     timer()
     {
-        //called everytimeinterval
+        // Called every time interval
         if (candresstimeout-- == 0)
         {
             candresstemp = TRUE;
@@ -229,7 +231,7 @@ default
 
     link_message(integer source, integer num, string choice, key id)
     {
-        // need to disallow dressing while dressing is happening
+        // Need to disallow dressing while dressing is happening
         if (num == 1)
         {
             if (!candresstemp)
@@ -252,7 +254,6 @@ default
             }
             else if (choice == "random")
             {
-                //candresstemp = FALSE;
                 dresserID = id;
                 candresstimeout = 8;
                 if (clothingprefix == "")
@@ -267,7 +268,7 @@ default
         }
         if (num == 2)
         {
-            //probably should have been in transformer
+            // Probably should have been in transformer
             string oldclothingprefix = clothingprefix;
             if (bigprefix)
             {
@@ -283,7 +284,7 @@ default
                 llOwnerSay("@attach:" + clothingprefix + "/~AO=force");
                 if (oldclothingprefix != "")
                 {
-                    //remove tatoo");
+                    // Remove tatoo
                     llOwnerSay("@remoutfit:" + clothingprefix + "/tatoo=force");
                     llOwnerSay("@attach:~normalself=force");
                     llSleep(4.0);
@@ -291,7 +292,7 @@ default
 
                 llOwnerSay("@attach:" + clothingprefix + "/~normalself=force");
             }
-            //puts on ~normalself
+            // Puts on ~normalself
         }
     }
     // First, all clothes are taken off except for skull and anything that might be revealing.
@@ -305,9 +306,10 @@ default
     listen(integer channel, string name, key id, string choice)
     {
         if (channel == 2555)
-        { // looks for one folder at start
+        {
+            // Looks for one folder at start
             string oldbigprefix = bigprefix;
-            list Outfits = llParseString2List(choice, [","], []); //what are brackets at end? 
+            list Outfits = llParseString2List(choice, [","], []);
             integer n;
             integer iStop = llGetListLength(Outfits);
             string itemname;
@@ -330,7 +332,7 @@ default
             }
             if (bigprefix != oldbigprefix)
             {
-                //outfits-don't-match-type bug only occurs when big prefix is changed
+                // Outfits-don't-match-type bug only occurs when big prefix is changed
                 clothingprefix = bigprefix;
             }
         }
@@ -346,7 +348,7 @@ default
 
         else if (channel == cd2667  && choice != "OK")
         {
-            //the random outfit from 2665 didn't work with the above
+            // The random outfit from 2665 didn't work with the above
             if (choice == NEXT)
             {
                 integer numoutfits = llGetListLength(newoutfits);
