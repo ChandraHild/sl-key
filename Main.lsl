@@ -26,6 +26,7 @@
 //_. M05 : A: (M01C) dynamic spin: +winding
 //_        B: +sound
 //_+ CH13: Make code style consistent
+//_. CH14: Make winding spin the key more
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -566,7 +567,7 @@ windanimate(integer i)
         //_M05B
         llSound("07af5599-8529-fb12-5891-1dcf1a33ee49", 1.0, 0, 1);
         //       '- [Muniki K[_Clock Key Winding Up, Free Sound Effects (YTube)]
-        llTargetOmega(<0.0, 0.0,-1.0>, TWO_PI/6.0/0.5, 1.0);
+        llTargetOmega(<0.0, 0.0,-1.0>, 120.0*DEG_TO_RAD/0.5, 1.0);
         llSleep(0.5);  //              '- 60o in 0.5s
         llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 0.0);
         llSleep(0.5);
