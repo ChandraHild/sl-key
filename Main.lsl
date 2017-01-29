@@ -1,4 +1,4 @@
-//_170128 CH13
+//_170129 CH16
 //_
 //_+ M01 : on AFK:
 //_        A: (CH06) turn AFK mode on, without halving the remaining time
@@ -23,10 +23,13 @@
 //_+ CH10: Show current outfit in outfit list
 //_+ CH11: Unpose after winding an unwound dolly!
 //_. CH12: Turn off AO for display dollies
-//_. M05 : A: (M01C) dynamic spin: +winding
+//_♥ M05 : A: (M01C) dynamic spin: +winding
 //_        B: +sound
 //_+ CH13: Make code style consistent
-//_. CH14: Make winding spin the key more
+//_+ CH14: Make winding spin the key more
+//_. CH15: Let the dolly enter and leave AFK while carried
+//_        And let her owner do it too
+//_. CH16: Clean up redundant code by letting run_time_permissions handle unposing
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -102,7 +105,7 @@ handlemenuchoices(string choice, string name, key ToucherID)
             llOwnerSay("@accepttp=rem");
         }
         llOwnerSay("@tplm=n,tploc=n,tplure=n,tplure:" + (string) carrierID + "=add,accepttp:" + (string) carrierID + "=add,accepttp:" + (string) MistressID + "=add");
-        llSay(0, dollname + " has been picked up by " + carriername);
+        llSay(PUBLIC_CHANNEL, dollname + " has been picked up by " + carriername);
     }
     else if (choice == "Place Down")
     {
@@ -121,15 +124,7 @@ handlemenuchoices(string choice, string name, key ToucherID)
     {
         if (collapsed == FALSE)
         {
-            if (currentanimation != "")
-            {
-                // Nice if this was called only if there was an animation, especially nice not to end belly
-                llStopAnimation(currentanimation);
-            }
-            currentanimation = "";
-            pose = FALSE;
             llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
-            aochange("on");
         }
     }
     else if (choice == "allow takeover")
@@ -142,7 +137,7 @@ handlemenuchoices(string choice, string name, key ToucherID)
         if (timeleftonkey > keylimit)
         {
             timeleftonkey = keylimit;
-            llSay(0, dollname + "'s time has reached her limit");
+            llSay(PUBLIC_CHANNEL, dollname + "'s time has reached her limit");
         }
         if (collapsed)
         {
@@ -168,21 +163,14 @@ handlemenuchoices(string choice, string name, key ToucherID)
             }
             llOwnerSay("@temprun=y,alwaysrun=y,sendchat=y,tplure=y,sittp=y,standtp=y,unsit=y,sit=y,shownames=y,showhovertextall=y,rediremote:999=rem");
             collapsed = FALSE;
-            pose = FALSE;
-            llStopAnimation("collapse");
-            llSleep(0.1);
             if (currentstate == "Display")
             {
-                posetime = poselimit;
                 newanimation = "beautystand";
             }
-            else
-            {
-                aochange("on");
-            }
+
             llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
         }
-        llSay(0, " -- " + name + " has given " + dollname + " 30 minutes of life.");
+        llSay(PUBLIC_CHANNEL, " -- " + name + " has given " + dollname + " 30 minutes of life.");
 
         //_M05A
         windanimate(3);
@@ -256,26 +244,24 @@ handlemenuchoices(string choice, string name, key ToucherID)
         {
             privatemenu += "can fly";
         }
+
+        //_CH15 \/
+        if (afk)
+        {
+            privatemenu += "stop afk";
+        }
+        else
+        {
+            privatemenu += "start afk";
+        }
+        //_CH15 /\
+
         llDialog(ToucherID, "See " + httpstart + "controller.htm Choose what you want to happen",  privatemenu, cd6012);
     }
     else if (choice == "Options")
     {
         string msg = httpstart + "keychoices.htm for explanation. (" + optiondate + " version)";
         list pluslist;
-        if (!candress)
-        {
-            pluslist += "can dress";
-        }
-        else
-        {
-            pluslist += "no dressing";
-        }
-
-        if (detachable)
-        {
-            pluslist += ["no detaching","take off now"];
-        }
-
         if (afk)
         {
             pluslist += "stop afk";
@@ -285,47 +271,64 @@ handlemenuchoices(string choice, string name, key ToucherID)
             pluslist += "start afk";
         }
 
-        if (!alwaysavailable)
+        if (!carried)
         {
-            pluslist += "automatic tp";
-        }
-
-        if (!stuck)
-        {
-            pluslist += "no self tp";
-        }
-
-        if (canfly)
-        {
-            pluslist += "no flying";
-        }
-
-        if (pleasuredoll)
-        {
-            pluslist += "not pleasure";
-        }
-        else
-        {
-            pluslist += "pleasure doll";
-        }
-        if (!hascontroller)
-        {
-            if (canbecomemistress)
+            if (!candress)
             {
-                pluslist += "no takeover";
+                pluslist += "can dress";
             }
             else
             {
-                pluslist += "allow takeover";
+                pluslist += "no dressing";
             }
-        }
-        if (visible)
-        {
-            pluslist += "Invisible";
-        }
-        else
-        {
-            pluslist += "Visible";
+
+            if (detachable)
+            {
+                pluslist += ["no detaching","take off now"];
+            }
+
+            if (!alwaysavailable)
+            {
+                pluslist += "automatic tp";
+            }
+
+            if (!stuck)
+            {
+                pluslist += "no self tp";
+            }
+
+            if (canfly)
+            {
+                pluslist += "no flying";
+            }
+
+            if (pleasuredoll)
+            {
+                pluslist += "not pleasure";
+            }
+            else
+            {
+                pluslist += "pleasure doll";
+            }
+            if (!hascontroller)
+            {
+                if (canbecomemistress)
+                {
+                    pluslist += "no takeover";
+                }
+                else
+                {
+                    pluslist += "allow takeover";
+                }
+            }
+            if (visible)
+            {
+                pluslist += "Invisible";
+            }
+            else
+            {
+                pluslist += "Visible";
+            }
         }
         llDialog(ToucherID,msg,pluslist , cd5666);
     }
@@ -386,13 +389,6 @@ collapse()
         newanimation = "away";
     }
     //_M03B /\
-
-    if (pose)
-    {
-        pose = FALSE;
-        llStopAnimation(currentanimation);
-        llSleep(0.1);
-    }
 
     llOwnerSay("@rediremote:999=add");
     llTargetOmega(ZERO_VECTOR, 0, 0);
@@ -459,7 +455,7 @@ uncarry()
     {
         llOwnerSay("@accepttp=add");
     }
-    llSay(0, dollname + " has been set down.");
+    llSay(PUBLIC_CHANNEL, dollname + " has been set down.");
     carrierID = NULL_KEY;
 }
 
@@ -640,7 +636,7 @@ default
             if (ToucherID == dollID)
             {
                 msg = "You are currently being carried";
-                menu = ["OK"];
+                menu = ["OK", "Options"];
                 if (MistressID == ChristinaID && !canbecomemistress)
                 {
                     menu += "allow takeover";
@@ -727,7 +723,7 @@ default
             if (timeleftonkey < 0)
             {
                 collapse();
-                llSay(0, dollname + " has run out of life");
+                llSay(PUBLIC_CHANNEL, dollname + " has run out of life");
             }
         }
         if (pose)
@@ -737,12 +733,7 @@ default
                 posetime -= 1;
                 if (posetime == 0)
                 {
-                    llStopAnimation(currentanimation);
-                    pose = FALSE;
-                    currentanimation = "";
-                    llSleep(0.1);
                     llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
-                    aochange("on");
                 }
             }
         }
@@ -784,8 +775,6 @@ default
         {
             if(!(llGetAgentInfo(dollID) & AGENT_SITTING) && currentanimation == "away")
             {
-                llStopAnimation(currentanimation);
-                llSleep(0.1);
                 newanimation = "collapse";
                 llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
             }
@@ -802,15 +791,9 @@ default
             }
             if (currentstate == "Display")
             {
-
-                // Nice if this was called only if there was an animation, especially nice not to end belly
-                llStopAnimation(currentanimation);
-                pose = FALSE;
-                llSleep(0.1);
                 if (choice != "Display")
                 {
                     llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
-                    aochange("on");
                 }
             }
 
@@ -819,9 +802,7 @@ default
             if (currentstate == "Display")
             {
                 newanimation = "beautystand";
-                posetime = poselimit;
                 llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
-                aochange("off");
             }
             if (currentstate == "Builder" || currentstate == "Key")
             {
@@ -841,7 +822,6 @@ default
             if (!collapsed)
             {
                 newanimation = choice;
-                posetime = poselimit;
                 llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
                 llOwnerSay("You are being posed");
             }
@@ -901,6 +881,7 @@ default
                 aochange("on");
                 llOwnerSay("@clear,detachme=force");
                 llOwnerSay("Your key has been taken off.");
+                return;
             }
             else if (choice == "no flying")
             {
@@ -948,6 +929,7 @@ default
         {
             aochange("on");
             llOwnerSay("@clear,detachme=force");
+            return;
         }
 
         else if (channel == cd6012 && (id == MistressID || id == ChristinaID) && id != dollID)
@@ -955,64 +937,77 @@ default
             if (choice == "detachable")
             {
                 detachable = TRUE;
-                llSay(0, dollname + "'s key can be detached.");
+                llSay(PUBLIC_CHANNEL, dollname + "'s key can be detached.");
             }
             else if (choice == "undetachable")
             {
                 detachable = FALSE;
-                llSay(0, dollname + "'s key cannot be detached.");
+                llSay(PUBLIC_CHANNEL, dollname + "'s key cannot be detached.");
             }
             else if (choice == "no auto tp")
             {
                 alwaysavailable = FALSE;
                 llOwnerSay("@accepttp=rem");
-                llSay(0, dollname + " can reject teleport offers.");
+                llSay(PUBLIC_CHANNEL, dollname + " can reject teleport offers.");
             }
             else if (choice == "auto tp")
             {
                 alwaysavailable = TRUE;
-                llSay(0, dollname + " cannot reject teleport offers.");
+                llSay(PUBLIC_CHANNEL, dollname + " cannot reject teleport offers.");
                 llOwnerSay("@accepttp=add");
             }
             else if (choice == "can travel")
             {
                 stuck = FALSE;
                 llOwnerSay("@tplm=y,tploc=y");
-                llSay(0, dollname + " may travel on her own initiative.");
+                llSay(PUBLIC_CHANNEL, dollname + " may travel on her own initiative.");
             }
             else if (choice == "no self trav")
             {
-                llSay(0, dollname + " is now a helpless doll and cannot travel on her own initiative.");
+                llSay(PUBLIC_CHANNEL, dollname + " is now a helpless doll and cannot travel on her own initiative.");
                 llOwnerSay("@tplm=n,tploc=n");
                 stuck = TRUE;
             }
             else if (choice == "drop control")
             {
-                llSay(0, dollname + "'s controller has given up control.");
+                llSay(PUBLIC_CHANNEL, dollname + "'s controller has given up control.");
                 MistressID = ChristinaID;
                 hascontroller = FALSE;
             }
             else if (choice == "no plsr doll")
             {
-                llSay(0, dollname + " is not a pleasure doll.");
+                llSay(PUBLIC_CHANNEL, dollname + " is not a pleasure doll.");
                 pleasuredoll = FALSE;
             }
             else if (choice == "make plsrdll")
             {
-                llSay(0, dollname + " has been made into a pleasure doll.");
+                llSay(PUBLIC_CHANNEL, dollname + " has been made into a pleasure doll.");
                 pleasuredoll = TRUE;    
             }
             else if (choice == "can fly")
             {
                 canfly = TRUE;
                 llOwnerSay("@fly=y");
-                llSay(0, dollname + " can fly.");    
+                llSay(PUBLIC_CHANNEL, dollname + " can fly.");
             }
             else if (choice == "no flying")
             {
                 canfly = FALSE;
                 llOwnerSay("@fly=n");
-                llSay(0, dollname + " cannot fly.");    
+                llSay(PUBLIC_CHANNEL, dollname + " cannot fly.");
+            }
+           else if (choice == "start afk")
+            {
+                startafk();
+                afk = TRUE;
+                llRegionSayTo(id, PUBLIC_CHANNEL, dollname + " is now in AFK mode and won't unwind.");
+            }
+            else if (choice == "stop afk")
+            {
+                stopafk();
+                afk = FALSE;
+                timeleftonkey =  timeleftonkey / 2;
+                llRegionSayTo(id, PUBLIC_CHANNEL, dollname + " is no longer in AFK mode and will wind down again.");
             }
         }
         else if (channel == cd4667 && id == carrierID)
@@ -1063,7 +1058,14 @@ default
                 llStartAnimation(newanimation);
                 currentanimation = newanimation;
                 newanimation = "";
+                posetime = poselimit;
                 pose = TRUE;
+            }
+            else
+            {
+                aochange("on");
+                pose = FALSE;
+                currentanimation = "";
             }
         }
         if (perm & PERMISSION_TAKE_CONTROLS)
