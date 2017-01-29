@@ -1,8 +1,8 @@
-//_170129 CH17
+//_170129 CH18
 //_
 //_+ M01 : on AFK:
-//_        A: (CH06) turn AFK mode on, without halving the remaining time
-//_        B: stop winddown
+//_        xA: (CH06) turn AFK mode on, without halving the remaining time
+//_        xB: stop winddown
 //_        C: dynamic TOmega
 //_+ M02 : options menu: reopen after choosing one
 //_+ M03 : unwind while sitting:
@@ -27,10 +27,11 @@
 //_        B: +sound
 //_+ CH13: Make code style consistent
 //_+ CH14: Make winding spin the key more
-//_. CH15: Let the dolly enter and leave AFK while carried
+//_+ CH15: Let the dolly enter and leave AFK while carried
 //_        And let her owner do it too
-//_. CH16: Clean up redundant code by letting run_time_permissions handle unposing
-//_. CH17: Use the new OC AO channel
+//_+ CH16: Clean up redundant code by letting run_time_permissions handle unposing
+//_+ CH17: Use the new OC AO channel
+//_+ CH18: Remove the away sensor from M01A/B, now that we have CH15
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -758,23 +759,7 @@ default
                 }
             }
         }
-        if (!collapsed)
-        {
-            //_M01B \/
-            if (llGetAgentInfo(dollID) & AGENT_AWAY)
-            {
-                if (winddown)
-                {
-                    startafk();
-                }
-            }
-            else if (!afk && !winddown)
-            {
-                stopafk();
-            }
-            //_M01B /\
-        }
-        else
+        if (collapsed)
         {
             if(!(llGetAgentInfo(dollID) & AGENT_SITTING) && currentanimation == "away")
             {
