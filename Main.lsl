@@ -1,4 +1,4 @@
-//_170129 CH16
+//_170129 CH17
 //_
 //_+ M01 : on AFK:
 //_        A: (CH06) turn AFK mode on, without halving the remaining time
@@ -30,6 +30,7 @@
 //_. CH15: Let the dolly enter and leave AFK while carried
 //_        And let her owner do it too
 //_. CH16: Clean up redundant code by letting run_time_permissions handle unposing
+//_. CH17: Use the new OC AO channel
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -401,7 +402,9 @@ collapse()
 aochange(string choice)
 {
     integer g_iAOChannel = -782690;
-    integer g_iInterfaceChannel = -12587429;
+
+    //_CH17
+    integer g_iInterfaceChannel = -llAbs((integer)("0x" + llGetSubString(dollID,30,-1)));;
     if (choice == "off")
     {
         string AO_OFF = "ZHAO_STANDOFF";
