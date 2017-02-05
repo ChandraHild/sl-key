@@ -1,4 +1,4 @@
-//_170129 CH18
+//_170129 CH19
 //_
 //_+ M01 : on AFK:
 //_        xA: (CH06) turn AFK mode on, without halving the remaining time
@@ -32,6 +32,7 @@
 //_+ CH16: Clean up redundant code by letting run_time_permissions handle unposing
 //_+ CH17: Use the new OC AO channel
 //_+ CH18: Remove the away sensor from M01A/B, now that we have CH15
+//_+ CH19: Turn AO off all the way, not just stands, when posing and unwinding. Fix CollarComand typo
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -408,15 +409,15 @@ aochange(string choice)
     integer g_iInterfaceChannel = -llAbs((integer)("0x" + llGetSubString(dollID,30,-1)));;
     if (choice == "off")
     {
-        string AO_OFF = "ZHAO_STANDOFF";
-        llWhisper(g_iInterfaceChannel, "CollarComand|499|" + AO_OFF);
+        string AO_OFF = "ZHAO_AOOFF";
+        llWhisper(g_iInterfaceChannel, "CollarCommand|499|" + AO_OFF);
         llWhisper(g_iAOChannel, AO_OFF);
         llMessageLinked(LINK_SET, 0, "ZHAO_AOON", NULL_KEY);
     }
     else
     {
-        string AO_ON = "ZHAO_STANDON";
-        llWhisper(g_iInterfaceChannel, "CollarComand|499|" + AO_ON);
+        string AO_ON = "ZHAO_AOON";
+        llWhisper(g_iInterfaceChannel, "CollarCommand|499|" + AO_ON);
         llWhisper(g_iAOChannel, AO_ON);
         llMessageLinked(LINK_SET, 0, "ZHAO_AOON", NULL_KEY);
     }
