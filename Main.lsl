@@ -1,8 +1,8 @@
-//_170129 CH19
+//_170207D M06
 //_
 //_+ M01 : on AFK:
-//_        xA: (CH06) turn AFK mode on, without halving the remaining time
-//_        xB: stop winddown
+//_       xA: (CH06) turn AFK mode on, without halving the remaining time
+//_       xB: stop winddown
 //_        C: dynamic TOmega
 //_+ M02 : options menu: reopen after choosing one
 //_+ M03 : unwind while sitting:
@@ -22,7 +22,7 @@
 //_+ CH09: Remove hover text, put in menu
 //_+ CH10: Show current outfit in outfit list
 //_+ CH11: Unpose after winding an unwound dolly!
-//_. CH12: Turn off AO for display dollies
+//_+ CH12: Turn off AO for display dollies
 //_♥ M05 : A: (M01C) dynamic spin: +winding
 //_        B: +sound
 //_+ CH13: Make code style consistent
@@ -31,8 +31,9 @@
 //_        And let her owner do it too
 //_+ CH16: Clean up redundant code by letting run_time_permissions handle unposing
 //_+ CH17: Use the new OC AO channel
-//_+ CH18: Remove the away sensor from M01A/B, now that we have CH15
+//_+ CH18: (M01) Remove the away sensor, now that we have CH15
 //_+ CH19: Turn AO off all the way, not just stands, when posing and unwinding. Fix CollarComand typo
+//_. M06 : (M05B) preload sound
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -717,6 +718,11 @@ default
             llWhisper(-60946337, "wind channel|" + (string)channel_dialog);
         }
         llDialog(ToucherID, timeleft + msg,  menu, channel_dialog);
+        if(ToucherID != dollID)                                                         //_M06 \/
+        {
+            llPreloadSound("07af5599-8529-fb12-5891-1dcf1a33ee49");
+            //_sleep (1.0)
+        }                                                                               //_M06 /\
     }
 
     timer()
