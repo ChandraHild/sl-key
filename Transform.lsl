@@ -15,7 +15,6 @@ integer listen_id_8667;
 integer listen_id_8665;
 integer listen_id_ask;
 integer minmin;
-integer maxmin;
 integer avoid;
 integer channel_dialog;
 integer channelHUD;
@@ -35,13 +34,11 @@ key kQuery;
 
 list currentphrases;
 
-
-
 setup()
 {
-    dollID =   llGetOwner();
+    dollID = llGetOwner();
     dollname = llGetDisplayName(dollID);
-    llMessageLinked( -4, 18, "here", dollID );
+    llMessageLinked(LINK_THIS, 18, "here", dollID );
     integer ncd = ( -1 * (integer)("0x"+llGetSubString((string)llGetKey(),-5,-1)) ) -1;
     if (channel_dialog != ncd)
     {
@@ -51,12 +48,12 @@ setup()
         llListenRemove(listen_id_ask);
         channel_dialog = ncd;
         cd8666 = channel_dialog - 8666;
-        listen_id_8666 = llListen( cd8666, "", "", "");
-        listen_id_8667 = llListen( cd8666+1, "", "", "");
-        listen_id_8665 = llListen( cd8666-1, "", "", "");
+        listen_id_8666 = llListen(cd8666, "", "", "");
+        listen_id_8667 = llListen(cd8666+1, "", "", "");
+        listen_id_8665 = llListen(cd8666-1, "", "", "");
         channelHUD = ( -1 * (integer)("0x"+llGetSubString((string)llGetOwner(),-5,-1)) )  - 1114;
         channelAsk = channelHUD - 1;
-        listen_id_ask = llListen( cd8666-1, "", "", "");
+        listen_id_ask = llListen(cd8666-1, "", "", "");
     }
     sendstatename();
 }
@@ -76,17 +73,17 @@ sendstatename()
     {
         tosend = "submissive";
     }
-    llSay(channelHUD,tosend);
+    llSay(channelHUD, tosend);
 }
     
 
 reloadscripts()
 {
     types = [];
-    integer  n = llGetInventoryNumber(7);
+    integer  n = llGetInventoryNumber(INVENTORY_NOTECARD);
     while(n)
     {
-        types += llGetInventoryName(7, --n);
+        types += llGetInventoryName(INVENTORY_NOTECARD, --n);
     }
 }
 
@@ -98,7 +95,6 @@ default
         reloadscripts();
         llSetTimerEvent(120.0); 
         cd8666 = ( -1 * (integer)("0x"+llGetSubString((string)llGetKey(),-5,-1)) ) - 8666;
-        maxmin = -1;
         needsagree = FALSE;
         seesphrases = TRUE;
         avoid = FALSE;
@@ -121,11 +117,6 @@ default
     {
         // Called every time interval
         minmin--;
-        maxmin--;
-        if (maxmin == 0)
-        {
-            llSay(cd8666,"Regular");
-        }
 
         if (seesphrases)
         {
@@ -190,7 +181,7 @@ default
                 }
 
                 integer channel = cd8666 - needsagree;
-                llDialog(id,msg,choices, channel);
+                llDialog(id, msg, choices, channel);
             }
         }
      }
@@ -209,42 +200,42 @@ default
                     choices = ["needs agree"];
                 }
                 if (seesphrases) {
-                    choices += ["stop phrases"];
+                    choices += "stop phrases";
                 }
                 else
                 {
-                    choices += ["start phrases"];
+                    choices += "start phrases";
                 }
                 llDialog(dollID,"Options",choices, cd8666+1);
         }
-
         else if (channel == cd8666 -1)
         {
                 list choices = [choice,"I cannot"];
                 string msg = "Can you make this change?";
-                llDialog(dollID,msg,choices, cd8666);
+                llDialog(dollID, msg, choices, cd8666);
                 avoid = TRUE;
         }
-        
-        else if (channel == cd8666 && choice != "OK" && choice != "I cannot")
+        else if (channel == cd8666)
         {
-            avoid = FALSE;
-            statename = choice;
-            sendstatename();
-            minmin = 5;
-            currentstate = choice;
-            clothingprefix = "*" + choice;
-            currentphrases = [];
-            lineno = 0;
-            kQuery = llGetNotecardLine(choice,0);
+            if (~llListFindList(types, (list)choice))
+            {
+                avoid = FALSE;
+                statename = choice;
+                sendstatename();
+                minmin = 5;
+                currentstate = choice;
+                clothingprefix = "*" + choice;
+                currentphrases = [];
+                lineno = 0;
+                kQuery = llGetNotecardLine(choice,0);
 
-            llMessageLinked(-4, 2, clothingprefix, dollID);
-            llSleep(1.0);
-            llMessageLinked(-4, 1, "random", id);
-            llMessageLinked(-4, 16, currentstate, dollID);
-            llSay(0, dollname + " has become a " + statename + " Doll.");
+                llMessageLinked(LINK_THIS, 2, clothingprefix, dollID);
+                llSleep(1.0);
+                llMessageLinked(LINK_THIS, 1, "random", id);
+                llMessageLinked(LINK_THIS, 16, currentstate, dollID);
+                llSay(0, dollname + " has become a " + statename + " Doll.");
+            }
         }
-
         else if (channel == cd8666+1)
         {
             if (choice == "automatic" || choice == "needs agree")
@@ -256,7 +247,6 @@ default
                 seesphrases = 1 - seesphrases;
             }
         }
-
         else if (channel == channelAsk)
         {
             if (choice == "ask")
