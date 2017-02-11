@@ -1,4 +1,4 @@
-//_170207D M06
+//_170210 CH21
 //_
 //_+ M01 : on AFK:
 //_       xA: (CH06) turn AFK mode on, without halving the remaining time
@@ -33,7 +33,9 @@
 //_+ CH17: Use the new OC AO channel
 //_+ CH18: (M01) Remove the away sensor, now that we have CH15
 //_+ CH19: Turn AO off all the way, not just stands, when posing and unwinding. Fix CollarComand typo
-//_. M06 : (M05B) preload sound
+//_+ M06 : (M05B) preload sound
+//_+ CH20: Uncarry if owner carries an already carried doll
+//_+ CH21: Skip setup things if the key isn't worn on back
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -101,6 +103,11 @@ handlemenuchoices(string choice, string name, key ToucherID)
 {
     if (choice == "Carry")
     {
+        if (carried)
+        {
+            uncarry();
+            llSleep(0.5);
+        }
         carried = TRUE;
         carriername = name;
         carrierID = ToucherID;
@@ -445,7 +452,7 @@ reloadscripts()
 uncarry()
 {
     carried = FALSE;
-    llOwnerSay("@accepttp:" + (string) carrierID + "=rem,@showinv=y");
+    llOwnerSay("@accepttp:" + (string)carrierID + "=rem,tplure:" + (string)carrierID + "=rem");
     if (!collapsed)
     {
         if (stuck)
@@ -467,6 +474,13 @@ uncarry()
 
 setup()
 {
+    if (llGetAttached() != ATTACH_BACK)
+    {
+        llOwnerSay("@detach=y");
+        llOwnerSay("Please detach your key and wear it on your spine");
+        return;
+    }
+
     if (dollID != llGetOwner())
     {
         dollID = llGetOwner();
@@ -501,17 +515,11 @@ setup()
         currentstate = "Regular";
     }
     dollname = llGetDisplayName(dollID);
-    if (llGetAttached() == ATTACH_BACK)
-    {
-        // Locks key
-        llOwnerSay("@detach=n");
-        llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
-    }
-    else
-    {
-        llOwnerSay("@detach=y");
-        llOwnerSay("Please detach your key and wear it on your spine"); 
-    }
+
+    // Locks key
+    llOwnerSay("@detach=n");
+    llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
+
     integer ncd = ( -1 * (integer)("0x"+llGetSubString((string)llGetKey(),-5,-1)) ) -1;
     if (channel_dialog != ncd)
     {
