@@ -1,11 +1,11 @@
-//_170210 CH22
+//_170210 CH23
 //_
 //_+ M01 : on AFK:
 //_       xA: (CH06) turn AFK mode on, without halving the remaining time
 //_       xB: stop winddown
 //_        C: dynamic TOmega
 //_+ M02 : options menu: reopen after choosing one
-//_x M03 : unwind while sitting:
+//_+ M03 : unwind while sitting:
 //_        A: no unsit
 //_        B: AFK anim.
 //_+ M04 : winder script vs. dynamic dialog channel:
@@ -36,7 +36,8 @@
 //_+ M06 : (M05B) preload sound
 //_+ CH20: Uncarry if owner carries an already carried doll
 //_+ CH21: Skip setup things if the key isn't worn on back
-//_+ CH22: (M03) Unsit on all AO changes from the key
+//_x CH22: (M03) Unsit on all AO changes from the key
+//_+ CH23: (CH22) Try using llStopAnimation to fix the sit glitches
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -390,7 +391,16 @@ collapse()
     llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,sittp=n,standtp=n,accepttp=n,accepttp:" + (string) carrierID + "=add,accepttp:" + (string) mainwinder + "=add,accepttp:" + (string) MistressID + "=add,sit=n,shownames=n,showhovertextall=n");
     llOwnerSay("@tplure=n,tplure:" + (string) mainwinder + "=add,tplure:" + (string) MistressID + "=add");
 
-    newanimation = "collapse";
+    //_M03B \/
+    if(llGetAgentInfo(dollID) & AGENT_SITTING)
+    {
+        newanimation = "away";
+    }
+    else
+    {
+        newanimation = "collapse";
+    }
+    //_M03B /\
 
     llOwnerSay("@rediremote:999=add");
     llTargetOmega(ZERO_VECTOR, 0, 0);
@@ -402,8 +412,6 @@ collapse()
 
 aochange(string choice)
 {
-    //_CH22 unsit on AO change, since AO changing glitches sits
-    llOwnerSay("@unsit=force");
     integer g_iAOChannel = -782690;
 
     //_CH17
@@ -423,8 +431,15 @@ aochange(string choice)
         llMessageLinked(LINK_SET, 0, "ZHAO_AOON", NULL_KEY);
     }
 
-    // Wait a little bit so that the AO has time to process things
-    llSleep(1.0);
+    //_CH23 \/
+    if (llGetAgentInfo(dollID) & AGENT_SITTING)
+    {
+        // Wait a little bit so that the AO has time to process things
+        llSleep(1.0);
+        llStopAnimation("sit");
+        llSleep(0.1);
+    }
+    //_CH23 \/
 }
 
 reloadscripts()
@@ -768,6 +783,14 @@ default
                         llStopMoveToTarget();
                     }
                 }
+            }
+        }
+        if (collapsed)
+        {
+            if(!(llGetAgentInfo(dollID) & AGENT_SITTING) && currentanimation == "away")
+            {
+                newanimation = "collapse";
+                llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
             }
         }
      }

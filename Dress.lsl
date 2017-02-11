@@ -201,6 +201,12 @@ dress(string choice)
     oldoutfit = newoutfit;
     oldoutfitname = newoutfitname;
     llSleep(8.0);
+
+    if (llGetAgentInfo(dollID) & AGENT_SITTING)
+    {
+        llRequestPermissions(dollID, PERMISSION_TRIGGER_ANIMATION);
+    }
+
     candresstimeout = 2;
 }
 
@@ -381,6 +387,14 @@ default
             {
                 dress(llList2String(newoutfits, (integer)choice-1));
             }
+        }
+    }
+
+    run_time_permissions(integer perm)
+    {
+        if (perm & PERMISSION_TRIGGER_ANIMATION)
+        {
+            llStopAnimation("sit");
         }
     }
 }
