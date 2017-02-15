@@ -193,18 +193,18 @@ default
                 list choices;
                 if (needsagree)
                 {
-                    choices = ["automatic"];
+                    choices = ["☐ Automatic"];
                 }
                 else
                 {
-                    choices = ["needs agree"];
+                    choices = ["☑ Automatic"];
                 }
                 if (seesphrases) {
-                    choices += "stop phrases";
+                    choices += "☑ Phrases";
                 }
                 else
                 {
-                    choices += "start phrases";
+                    choices += "☐ Phrases";
                 }
                 llDialog(dollID,"Options",choices, cd8666+1);
         }
@@ -238,13 +238,13 @@ default
         }
         else if (channel == cd8666+1)
         {
-            if (choice == "automatic" || choice == "needs agree")
+            if (choice == "☑ Automatic" || choice == "☐ Automatic")
             {
-                needsagree = 1 - needsagree;
+                needsagree = !needsagree;
             }
-            else if (choice == "stop phrases" || choice == "start phrases")
+            else if (choice == "☑ Phrases" || choice == "☐ Phrases")
             {
-                seesphrases = 1 - seesphrases;
+                seesphrases = !seesphrases;
             }
         }
         else if (channel == channelAsk)
