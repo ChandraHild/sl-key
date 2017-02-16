@@ -1,4 +1,4 @@
-//_170212 CH25
+//_170216 CH26
 //_
 //_+ M01 : on AFK:
 //_       xA: (CH06) turn AFK mode on, without halving the remaining time
@@ -39,7 +39,8 @@
 //_x CH22: (M03) Unsit on all AO changes from the key
 //_+ CH23: (CH22) Try using llStopAnimation to fix the sit glitches
 //_+ CH24: Lots of cleanup of key startup
-//_. CH25: Use checkboxes in menus
+//_+ CH25: Use checkboxes in menus
+//_+ CH26: Tweaking of RLV
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -116,9 +117,14 @@ handlemenuchoices(string choice, string name, key ToucherID)
         carrierID = ToucherID;
         if (alwaysavailable)
         {
+            // Disable auto TP while we're carried
             llOwnerSay("@accepttp=rem");
         }
-        llOwnerSay("@tplm=n,tploc=n,tplure=n,tplure:" + (string) carrierID + "=add,accepttp:" + (string) carrierID + "=add,accepttp:" + (string) MistressID + "=add");
+        if (carrierID != MistressID)
+        {
+            llOwnerSay("@tplure:" + (string) carrierID + "=add,accepttp:" + (string) carrierID + "=add");
+        }
+        llOwnerSay("@tplm=n,tploc=n,tplure=n");
         llSay(PUBLIC_CHANNEL, dollname + " has been picked up by " + carriername);
     }
     else if (choice == "Place Down")
@@ -167,15 +173,20 @@ handlemenuchoices(string choice, string name, key ToucherID)
             {
                 llOwnerSay("@fly=y");
             }
-            if (!stuck)
+            if (!carried)
             {
-                llOwnerSay("@tplm=y,tploc=y");
+                if (!stuck)
+                {
+                    llOwnerSay("@tplm=y,tploc=y");
+                }
+                llOwnerSay("@tplure=y");
             }
-            if (!alwaysavailable)
+            llOwnerSay("@temprun=y,alwaysrun=y,sendchat=y,sittp=y,standtp=y,unsit=y,sit=y,shownames=y,showhovertextall=y,rediremote:999=rem,accepttp:" + (string) mainwinder + "=rem,tplure:" + (string) mainwinder + "=rem");
+            if (!hascontroller)
             {
-                llOwnerSay("@accepttp=y");
+                llOwnerSay("@accepttp:" + (string) ChristinaID + "=rem,tplure:" + (string) ChristinaID + "=rem");
             }
-            llOwnerSay("@temprun=y,alwaysrun=y,sendchat=y,tplure=y,sittp=y,standtp=y,unsit=y,sit=y,shownames=y,showhovertextall=y,rediremote:999=rem");
+
             collapsed = FALSE;
             if (currentstate == "Display")
             {
@@ -206,6 +217,7 @@ handlemenuchoices(string choice, string name, key ToucherID)
         canbecomemistress = FALSE;
         hascontroller = TRUE;
         MistressID = ToucherID;
+        llOwnerSay("@tplure:" + (string) MistressID + "=add,accepttp:" + (string) MistressID + "=add");
         llOwnerSay("The person carrying you has taken over as your controller.");
         string msg = "You are now " + dollname + "'s controller. See " + httpstart + "controller.htm";
         llDialog(ToucherID,msg,["OK"] , 9999);
@@ -361,7 +373,7 @@ startafk()
 
     //_M01C
     llTargetOmega(ZERO_VECTOR, 0.0, 0.0);
-    llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,tplure=n,sittp=n,standtp=n,accepttp=n,sit=n");
+    llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,tplure=n,sittp=n,standtp=n,sit=n");
 }
 
 stopafk()
@@ -382,21 +394,20 @@ stopafk()
     {
         llOwnerSay("@fly=y");
     }
-    if (!stuck)
+    if (!stuck && !carried)
     {
         llOwnerSay("@tplm=y,tploc=y");
-    }
-    if (!alwaysavailable)
-    {
-        llOwnerSay("@accepttp=y");
     }
     llOwnerSay("@temprun=y,alwaysrun=y,sendchat=y,tplure=y,sittp=y,standtp=y,sit=y");
 }
 
 collapse()
 {
-    llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,sittp=n,standtp=n,accepttp=n,accepttp:" + (string) carrierID + "=add,accepttp:" + (string) mainwinder + "=add,accepttp:" + (string) MistressID + "=add,sit=n,shownames=n,showhovertextall=n");
-    llOwnerSay("@tplure=n,tplure:" + (string) mainwinder + "=add,tplure:" + (string) MistressID + "=add");
+    llOwnerSay("@fly=n,temprun=n,alwaysrun=n,sendchat=n,tplm=n,tploc=n,sittp=n,standtp=n,accepttp:" + (string) mainwinder + "=add,tplure:" + (string) mainwinder + "=add,sit=n,shownames=n,showhovertextall=n,tplure=n");
+    if (!hascontroller)
+    {
+        llOwnerSay("@accepttp:" + (string) ChristinaID + "=add,tplure:" + (string) ChristinaID + "=add");
+    }
 
     //_M03B \/
     string animation;
@@ -471,16 +482,19 @@ reloadscripts()
 uncarry()
 {
     carried = FALSE;
-    llOwnerSay("@accepttp:" + (string)carrierID + "=rem,tplure:" + (string)carrierID + "=rem");
+    if (carrierID != MistressID)
+    {
+        llOwnerSay("@accepttp:" + (string)carrierID + "=rem,tplure:" + (string)carrierID + "=rem");
+    }
     if (!collapsed)
     {
         if (stuck)
         {
-            llOwnerSay("@tplure=y,accepttp=y");
+            llOwnerSay("@tplure=y");
         }
         else
         {
-            llOwnerSay("@tplm=y,tploc=y,tplure=y,accepttp=y");
+            llOwnerSay("@tplm=y,tploc=y,tplure=y");
         }
     }
     if (alwaysavailable)
@@ -531,19 +545,14 @@ init()
     else
     {
         hascontroller = FALSE;
-        MistressID = ChristinaID;
+        MistressID = NULL_KEY;
     }
     timeleftonkey = 180;
     llMessageLinked(LINK_THIS, 200, "start", dollID);
     visible = TRUE;
     currentstate = "Regular";
 
-    llTargetOmega(<0,0,1>,.3,1.0);
-
     reloadscripts();
-
-    // Clock is accessed every ten seconds;
-    llSetTimerEvent(10.0);
 }
 
 // Things to do every time the key is worn or we log in
@@ -551,11 +560,15 @@ startup()
 {
     if (llGetAttached() != ATTACH_BACK)
     {
+        llTargetOmega(ZERO_VECTOR, 0, 0);
+        llSetTimerEvent(0.0);
         llOwnerSay("@detach=y");
         llOwnerSay("Please detach your key and wear it on your spine");
         return;
     }
-
+    // Clock is accessed every ten seconds;
+    llSetTimerEvent(10.0);
+    llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);
     dollname = llGetDisplayName(dollID);
 
     // Locks key
@@ -580,6 +593,11 @@ startup()
         llOwnerSay("@fly=n");
     }
 
+    if (hascontroller)
+    {
+        // Always allow the doll's owner to TP their doll
+        llOwnerSay("@tplure:" + (string) MistressID + "=add,accepttp:" + (string) MistressID + "=add");
+    }
     if (carried && carrierID != MistressID)
     {
         uncarry();
@@ -632,13 +650,9 @@ default
         startup();
     }
 
-    attach(key id)
+    on_rez(integer start_param)
     {
-        if (id)
-        {
-            // When key is put on, or when logging back on
-            startup();
-        }
+        startup();
     }
 
     changed(integer change)
@@ -661,6 +675,12 @@ default
 
         // Detects user UUID
         key ToucherID = llDetectedKey(0);
+        if (llGetAttached() != ATTACH_BACK)
+        {
+            llRegionSayTo(ToucherID, PUBLIC_CHANNEL, "The key must be attached to the doll's back before you can use it.");
+            return;
+        }
+
 
         string msg;
         list menu =  ["Wind"];
@@ -676,7 +696,7 @@ default
             {
                 msg = "You are currently being carried";
                 menu = ["OK", "Options"];
-                if (MistressID == ChristinaID && !canbecomemistress)
+                if (MistressID == NULL_KEY && !canbecomemistress)
                 {
                     menu += "allow takeover";
                 }
@@ -956,19 +976,28 @@ default
             else if (choice == "☑ Auto TP")
             {
                 alwaysavailable = FALSE;
-                llOwnerSay("@accepttp=rem");
+                if (!carried)
+                {
+                    llOwnerSay("@accepttp=rem");
+                }
                 llSay(PUBLIC_CHANNEL, dollname + " can reject teleport offers.");
             }
             else if (choice == "☐ Auto TP")
             {
                 alwaysavailable = TRUE;
                 llSay(PUBLIC_CHANNEL, dollname + " cannot reject teleport offers.");
-                llOwnerSay("@accepttp=add");
+                if (!carried)
+                {
+                    llOwnerSay("@accepttp=add");
+                }
             }
             else if (choice == "☐ Self TP")
             {
                 stuck = FALSE;
-                llOwnerSay("@tplm=y,tploc=y");
+                if (!carried)
+                {
+                    llOwnerSay("@tplm=y,tploc=y");
+                }
                 llSay(PUBLIC_CHANNEL, dollname + " may travel on her own initiative.");
             }
             else if (choice == "☑ Self TP")
@@ -980,7 +1009,8 @@ default
             else if (choice == "Drop control")
             {
                 llSay(PUBLIC_CHANNEL, dollname + "'s controller has given up control.");
-                MistressID = ChristinaID;
+                llOwnerSay("@tplure:" + (string) MistressID + "=rem,accepttp:" + (string) MistressID + "=rem");
+                MistressID = NULL_KEY;
                 hascontroller = FALSE;
             }
             else if (choice == "☑ Pleasure")
