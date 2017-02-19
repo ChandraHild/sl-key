@@ -1,4 +1,4 @@
-//_170216 CH26
+//_170216 CH27
 //_
 //_+ M01 : on AFK:
 //_       xA: (CH06) turn AFK mode on, without halving the remaining time
@@ -41,6 +41,7 @@
 //_+ CH24: Lots of cleanup of key startup
 //_+ CH25: Use checkboxes in menus
 //_+ CH26: Tweaking of RLV
+//_+ CH27: Move the Use Control button
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -769,7 +770,7 @@ default
         }
         if (ToucherID == MistressID || ToucherID == ChristinaID)
         {
-            menu += "Use Control";
+            menu = llListInsertList(menu, ["Use Control"], 3);
 
             //_M04A
             llWhisper(-60946337, "wind channel|" + (string)channel_dialog);
