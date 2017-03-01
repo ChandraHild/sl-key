@@ -1,4 +1,4 @@
-//_170216 CH27
+//_170228 CH28
 //_
 //_+ M01 : on AFK:
 //_       xA: (CH06) turn AFK mode on, without halving the remaining time
@@ -42,6 +42,9 @@
 //_+ CH25: Use checkboxes in menus
 //_+ CH26: Tweaking of RLV
 //_+ CH27: Move the Use Control button
+//_+ CH28: Allow the doll to be dressed if she isn't carried
+//_        When collapsed and leaving AFK, don't spin the key
+//_        Give message before the animation when leaving AFK
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -165,11 +168,6 @@ handlemenuchoices(string choice, string name, key ToucherID)
             // Uncollapsing
             timeleftonkey = windamount;
             //_M01C_llTargetOmega(<0,0,1>,.3,1.0);
-            if (winddown)
-            {
-                //_M01C
-                llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);
-            }
             if (canfly)
             {
                 llOwnerSay("@fly=y");
@@ -381,6 +379,10 @@ stopafk()
 {
     winddown = TRUE;
 
+    if (collapsed)
+    {
+        return;
+    }
     //_M01C \/
     llTargetOmega(<0.0, 0.0, 1.0>, 3.0, 1.0);
     llSleep(2.0);
@@ -705,7 +707,7 @@ default
             else
             {
                 msg = httpstart + "dollkeyselfinfo.htm\nYou are a " + currentstate + " doll.";
-                menu = ["Dress","Options"];
+                menu = ["Dress", "Options"];
                 if (!pose)
                 {
                     menu += "Pose";
@@ -721,7 +723,7 @@ default
             if (ToucherID == carrierID)
             {
                 msg = "Place Down frees " + dollname + " when you are done with her";
-                menu += ["Place Down","Pose"];
+                menu += ["Place Down", "Pose"];
                 if (candress)
                 {
                     menu += "Dress";
@@ -761,7 +763,7 @@ default
             {
                 msg += " She is currently marked AFK.";
             }
-            menu += "Carry";
+            menu += ["Dress", "Carry"];
             if (pose)
             {
                 menu += "Unpose";
@@ -1045,16 +1047,16 @@ default
             }
            else if (choice == "☐ AFK")
             {
+                llRegionSayTo(id, PUBLIC_CHANNEL, dollname + " is now in AFK mode and won't unwind.");
                 startafk();
                 afk = TRUE;
-                llRegionSayTo(id, PUBLIC_CHANNEL, dollname + " is now in AFK mode and won't unwind.");
             }
             else if (choice == "☑ AFK")
             {
+                llRegionSayTo(id, PUBLIC_CHANNEL, dollname + " is no longer in AFK mode and will wind down again.");
                 stopafk();
                 afk = FALSE;
                 timeleftonkey =  timeleftonkey / 2;
-                llRegionSayTo(id, PUBLIC_CHANNEL, dollname + " is no longer in AFK mode and will wind down again.");
             }
             handlemenuchoices("Use Control", name, id);
         }
