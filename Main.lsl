@@ -1,4 +1,4 @@
-//_170228 CH28
+//_170303 CH29
 //_
 //_+ M01 : on AFK:
 //_       xA: (CH06) turn AFK mode on, without halving the remaining time
@@ -45,6 +45,7 @@
 //_+ CH28: Allow the doll to be dressed if she isn't carried
 //_        When collapsed and leaving AFK, don't spin the key
 //_        Give message before the animation when leaving AFK
+//_. CH29: Oops, let the doll get transformed too!
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -763,7 +764,15 @@ default
             {
                 msg += " She is currently marked AFK.";
             }
-            menu += ["Dress", "Carry"];
+            menu += "Carry";
+            if (candress)
+            {
+                menu += "Dress";
+            }
+            if (cantransform)
+            {
+                menu += "Type of Doll";
+            }
             if (pose)
             {
                 menu += "Unpose";
