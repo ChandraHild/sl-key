@@ -1,4 +1,4 @@
-//_170303 CH29
+//_170314 M07
 //_
 //_+ M01 : on AFK:
 //_       xA: (CH06) turn AFK mode on, without halving the remaining time
@@ -45,7 +45,8 @@
 //_+ CH28: Allow the doll to be dressed if she isn't carried
 //_        When collapsed and leaving AFK, don't spin the key
 //_        Give message before the animation when leaving AFK
-//_. CH29: Oops, let the doll get transformed too!
+//_+ CH29: Oops, let the doll get transformed too!
+//_. M07 : M06 vs. delay: -> Sound
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -631,7 +632,7 @@ windanimate(integer i)
     do
     {
         //_M05B
-        llSound("07af5599-8529-fb12-5891-1dcf1a33ee49", 1.0, 0, 1);
+        llPlaySound("07af5599-8529-fb12-5891-1dcf1a33ee49", 1.0);
         //       '- [Muniki K[_Clock Key Winding Up, Free Sound Effects (YTube)]
         llTargetOmega(<0.0, 0.0,-1.0>, 120.0*DEG_TO_RAD/0.5, 1.0);
         llSleep(0.5);  //              '- 60o in 0.5s
@@ -728,10 +729,10 @@ default
                 if (candress)
                 {
                     menu += "Dress";
-                }
-                if (cantransform)
-                {
-                    menu += "Type of Doll";
+                    if (cantransform)
+                    {
+                        menu += "Type of Doll";
+                    }
                 }
                 if (pose)
                 {
@@ -768,10 +769,10 @@ default
             if (candress)
             {
                 menu += "Dress";
-            }
-            if (cantransform)
-            {
-                menu += "Type of Doll";
+                if (cantransform)
+                {
+                    menu += "Type of Doll";
+                }
             }
             if (pose)
             {
@@ -789,8 +790,7 @@ default
         llDialog(ToucherID, timeleft + msg,  menu, channel_dialog);
         if(ToucherID != dollID)                                                         //_M06 \/
         {
-            llPreloadSound("07af5599-8529-fb12-5891-1dcf1a33ee49");
-            //_sleep (1.0)
+            llPlaySound("07af5599-8529-fb12-5891-1dcf1a33ee49", 0.0);
         }                                                                               //_M06 /\
     }
 
