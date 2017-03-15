@@ -190,7 +190,7 @@ dress(string choice)
     newoutfitwordend = llStringLength(newoutfit) - 1;
     llOwnerSay("@detach=force");
     llOwnerSay("@remoutfit=force");
-    llSleep(5.0);
+    llSleep(10.0);
     if (llGetSubString(oldoutfitname,0,0) == "+" && llGetSubString(newoutfitname,0,0) != "+")
     {
         // Only works well assuming in regular
@@ -200,7 +200,7 @@ dress(string choice)
     oldattachmentpoints = choice;
     oldoutfit = newoutfit;
     oldoutfitname = newoutfitname;
-    llSleep(8.0);
+    llSleep(10.0);
 
     if (llGetAgentInfo(dollID) & AGENT_SITTING)
     {
