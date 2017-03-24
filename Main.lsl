@@ -1,4 +1,4 @@
-//_170314 M07
+//_170323 CH30
 //_
 //_+ M01 : on AFK:
 //_       xA: (CH06) turn AFK mode on, without halving the remaining time
@@ -46,7 +46,8 @@
 //_        When collapsed and leaving AFK, don't spin the key
 //_        Give message before the animation when leaving AFK
 //_+ CH29: Oops, let the doll get transformed too!
-//_. M07 : M06 vs. delay: -> Sound
+//_+ M07 : M06 vs. delay: -> Sound
+//_. CH30: Set AFK status when logging in
 //_
 //_x (CH03)M01B vs. TOmega on collapse: ("Chandra thinks that should be if(!winddown && !collapsed)")
 //_x (CH07)(M03A) "If Chandra runs out of life when nobody's around, and she's stuck on a chair,
@@ -573,7 +574,15 @@ startup()
     }
     // Clock is accessed every ten seconds;
     llSetTimerEvent(10.0);
-    llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);
+
+    if(afk)
+    {
+        startafk();
+    }
+    else
+    {
+        llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);
+    }
     dollname = llGetDisplayName(dollID);
 
     // Locks key
