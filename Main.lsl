@@ -91,8 +91,8 @@ integer cd5666;
 string currentstate;
 
 // assuming a clock interval of 10
-integer windamount = 180; //30 minutes
-integer keylimit =   720; //2 hours
+integer windamount = 360; //1 hour
+integer keylimit =   1800; //5 hours
 integer poselimit =  30;  //5 minutes
 
 integer timeleftonkey;
@@ -197,7 +197,7 @@ handlemenuchoices(string choice, string name, key ToucherID)
 
             llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
         }
-        llSay(PUBLIC_CHANNEL, " -- " + name + " has given " + dollname + " 30 minutes of life.");
+        llSay(PUBLIC_CHANNEL, " -- " + name + " has given " + dollname + " 1 hour of life.");
 
         //_M05A
         windanimate(3);
@@ -543,17 +543,17 @@ init()
     afk = FALSE;
     if (dollID == "27f02017-bf33-49f9-b7b9-9317b7791fc0")
     {
-        // CH05 Set Muniki as owner if we're Chandra!
+        // CH05 Set Janoria as owner if we're Chandra!
         hascontroller = TRUE;
         // Muniki's ID
-        MistressID = "ac80e0b5-04ab-44a9-8a79-2d85c85da247";
+        MistressID = "f14aefed-e2a7-4716-a9ec-9b3540674e5f";
     }
     else
     {
         hascontroller = FALSE;
         MistressID = NULL_KEY;
     }
-    timeleftonkey = 180;
+    timeleftonkey = 360;
     llMessageLinked(LINK_THIS, 200, "start", dollID);
     visible = TRUE;
     currentstate = "Regular";
