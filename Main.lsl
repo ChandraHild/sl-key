@@ -855,6 +855,10 @@ default
 
      link_message(integer source, integer num, string choice, key id)
      {
+        if (num == 1)
+        {
+            llLoadURL(id, "Please choose an outfit at this website.", "http://www.carlyletheassolutions.com/wardrobe/wardrobe.php?owner=27f02017-bf33-49f9-b7b9-9317b7791fc0&ownername=ChandraHild&t=340682465652e868aee93499c4caa26e665e995e");
+        }
         if (num == 16)
         {
             // Changes over to current state being new state
@@ -877,7 +881,7 @@ default
                 winddown = TRUE;
             }
         }
-        if (num == 18)
+        else if (num == 18)
         {
             cantransform = TRUE;
         }
