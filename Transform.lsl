@@ -31,6 +31,7 @@ key dollID;
 string clothingprefix;
 
 key kQuery;
+key toucher;
 
 list currentphrases;
 
@@ -222,16 +223,15 @@ default
                 avoid = FALSE;
                 statename = choice;
                 sendstatename();
-                minmin = 5;
+                minmin = 2;
                 currentstate = choice;
                 clothingprefix = "*" + choice;
                 currentphrases = [];
                 lineno = 0;
+                toucher = id;
                 kQuery = llGetNotecardLine(choice,0);
-
                 llMessageLinked(LINK_THIS, 2, clothingprefix, dollID);
                 llSleep(1.0);
-                llMessageLinked(LINK_THIS, 1, "random", id);
                 llMessageLinked(LINK_THIS, 16, currentstate, dollID);
                 llSay(0, dollname + " has become a " + statename + " Doll.");
             }
@@ -264,10 +264,28 @@ default
             {
                 if (llStringLength(data) > 1)
                 {
-                    currentphrases += data;
+                    if (lineno == 0)
+                    {
+                        llMessageLinked(LINK_THIS, 3, data, toucher);
+                    }
+                    else if (lineno == 1)
+                    {
+                        llOwnerSay("@detachallthis:"+data+"=n");
+                        llOwnerSay("@remoutfit=force,detach=force");
+                        llOwnerSay("@attachover:"+data+"=force");
+                        llOwnerSay("@detachallthis:"+data+"=y");
+                    }
+                    else
+                    {
+                        currentphrases += data;
+                    }
                 }
                 lineno++;
                 kQuery = llGetNotecardLine(currentstate,lineno);
+            }
+            else
+            {
+                llMessageLinked(LINK_THIS, 1, "start", toucher);
             }
          }
     }

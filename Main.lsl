@@ -79,6 +79,7 @@ integer candress;
 integer canbecomemistress;
 
 string httpstart = "See http://CommunityDolls.com/";
+string wardrobeURL = "http://www.carlyletheassolutions.com/wardrobe/wardrobe.php?owner=27f02017-bf33-49f9-b7b9-9317b7791fc0&ownername=ChandraHild&t=340682465652e868aee93499c4caa26e665e995e";
 key dollID;
 key carrierID;
 key dresserID;
@@ -857,9 +858,13 @@ default
      {
         if (num == 1)
         {
-            llLoadURL(id, "Please choose an outfit at this website.", "http://www.carlyletheassolutions.com/wardrobe/wardrobe.php?owner=27f02017-bf33-49f9-b7b9-9317b7791fc0&ownername=ChandraHild&t=340682465652e868aee93499c4caa26e665e995e");
+            llLoadURL(id, "Please choose an outfit at this website.", wardrobeURL);
         }
-        if (num == 16)
+        else if (num == 3)
+        {
+            wardrobeURL = choice;
+        }
+        else if (num == 16)
         {
             // Changes over to current state being new state
             currentstate = choice;
