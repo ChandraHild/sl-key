@@ -6,19 +6,8 @@ string statename;
 list types;
 integer lineno;
 
-integer cd8666;
-integer cd8667;
-integer cd8665;
-
-integer listen_id_8666;
-integer listen_id_8667;
-integer listen_id_8665;
-integer listen_id_ask;
 integer minmin;
-integer avoid;
 integer channel_dialog;
-integer channelHUD;
-integer channelAsk;
 
 // 1.5 minute
 integer menulimit = 9;
@@ -26,6 +15,7 @@ integer menulimit = 9;
 string currentstate;
 integer winddown;
 integer needsagree;
+integer inchoice;
 integer seesphrases;
 key dollID;
 string clothingprefix;
@@ -40,43 +30,8 @@ setup()
     dollID = llGetOwner();
     dollname = llGetDisplayName(dollID);
     llMessageLinked(LINK_THIS, 18, "here", dollID );
-    integer ncd = ( -1 * (integer)("0x"+llGetSubString((string)llGetKey(),-5,-1)) ) -1;
-    if (channel_dialog != ncd)
-    {
-        llListenRemove(listen_id_8666);
-        llListenRemove(listen_id_8665);
-        llListenRemove(listen_id_8667);
-        llListenRemove(listen_id_ask);
-        channel_dialog = ncd;
-        cd8666 = channel_dialog - 8666;
-        listen_id_8666 = llListen(cd8666, "", "", "");
-        listen_id_8667 = llListen(cd8666+1, "", "", "");
-        listen_id_8665 = llListen(cd8666-1, "", "", "");
-        channelHUD = ( -1 * (integer)("0x"+llGetSubString((string)llGetOwner(),-5,-1)) )  - 1114;
-        channelAsk = channelHUD - 1;
-        listen_id_ask = llListen(cd8666-1, "", "", "");
-    }
-    sendstatename();
+    channel_dialog = -llAbs((integer)("0x" + llGetSubString(dollID,30,-1))) -1;
 }
-
-sendstatename()
-{
-    string tosend = statename;
-    if (tosend == "Regular")
-    {
-        tosend = "Normal";
-    }
-    else if (tosend = "Domme")
-    {
-        tosend = "Dominant";
-    }
-    else if (tosend = "Submissive")
-    {
-        tosend = "submissive";
-    }
-    llSay(channelHUD, tosend);
-}
-    
 
 reloadscripts()
 {
@@ -95,10 +50,8 @@ default
         setup();
         reloadscripts();
         llSetTimerEvent(120.0); 
-        cd8666 = ( -1 * (integer)("0x"+llGetSubString((string)llGetKey(),-5,-1)) ) - 8666;
         needsagree = FALSE;
         seesphrases = TRUE;
-        avoid = FALSE;
     }
 
     on_rez(integer iParam)
@@ -167,12 +120,14 @@ default
     {
         if (num == 17)
         {
+            // Transform menu opened
             if (minmin > 0)
             {
                 llDialog(id,dollname + "cannot be transformed right now. She was recently transformed.",["OK"], 9999);
             }
             else
             {
+                inchoice = TRUE;
                 string msg = "These change the personality of " + dollname + " She is currently a " + statename + ". What type of doll do you want her to be?";
                 llOwnerSay(choice + " is looking at your Transform options.");
                 list choices = types;
@@ -181,77 +136,65 @@ default
                     choices += "CHOICES";
                 }
 
-                integer channel = cd8666 - needsagree;
-                llDialog(id, msg, choices, channel);
+                llDialog(id, msg, choices, channel_dialog);
             }
         }
-     }
-
-     listen(integer channel, string name, key id, string choice)
-     {
-        if (choice == "CHOICES")
+        else if (num == 19)
         {
-                list choices;
-                if (needsagree)
-                {
-                    choices = ["☐ Automatic"];
-                }
-                else
-                {
-                    choices = ["☑ Automatic"];
-                }
-                if (seesphrases) {
-                    choices += "☑ Phrases";
-                }
-                else
-                {
-                    choices += "☐ Phrases";
-                }
-                llDialog(dollID,"Options",choices, cd8666+1);
-        }
-        else if (channel == cd8666 -1)
-        {
+            // Second transform menu
+            if (choice == "CHOICES")
+            {
+                    list choices;
+                    if (needsagree)
+                    {
+                        choices = ["☐ Automatic"];
+                    }
+                    else
+                    {
+                        choices = ["☑ Automatic"];
+                    }
+                    if (seesphrases)
+                    {
+                        choices += "☑ Phrases";
+                    }
+                    else
+                    {
+                        choices += "☐ Phrases";
+                    }
+                    llDialog(dollID,"Options",choices, channel_dialog);
+            }
+            else if (needsagree == TRUE && inchoice == TRUE)
+            {
+                inchoice = FALSE;
                 list choices = [choice,"I cannot"];
                 string msg = "Can you make this change?";
-                llDialog(dollID, msg, choices, cd8666);
-                avoid = TRUE;
-        }
-        else if (channel == cd8666)
-        {
-            if (~llListFindList(types, (list)choice))
-            {
-                avoid = FALSE;
-                statename = choice;
-                sendstatename();
-                minmin = 2;
-                currentstate = choice;
-                clothingprefix = "*" + choice;
-                currentphrases = [];
-                lineno = 0;
-                toucher = id;
-                kQuery = llGetNotecardLine(choice,0);
-                llMessageLinked(LINK_THIS, 2, clothingprefix, dollID);
-                llSleep(1.0);
-                llMessageLinked(LINK_THIS, 16, currentstate, dollID);
-                llSay(0, dollname + " has become a " + statename + " Doll.");
+                llDialog(dollID, msg, choices, channel_dialog);
             }
-        }
-        else if (channel == cd8666+1)
-        {
-            if (choice == "☑ Automatic" || choice == "☐ Automatic")
+            else
             {
-                needsagree = !needsagree;
-            }
-            else if (choice == "☑ Phrases" || choice == "☐ Phrases")
-            {
-                seesphrases = !seesphrases;
-            }
-        }
-        else if (channel == channelAsk)
-        {
-            if (choice == "ask")
-            {
-                sendstatename();
+                if (~llListFindList(types, (list)choice))
+                {
+                    statename = choice;
+                    minmin = 2;
+                    currentstate = choice;
+                    clothingprefix = "*" + choice;
+                    currentphrases = [];
+                    lineno = 0;
+                    toucher = id;
+                    kQuery = llGetNotecardLine(choice,0);
+                    llMessageLinked(LINK_THIS, 2, clothingprefix, dollID);
+                    llSleep(1.0);
+                    llMessageLinked(LINK_THIS, 16, currentstate, id);
+                    llSay(0, dollname + " has become a " + statename + " Doll.");
+                }
+                else if (choice == "☑ Automatic" || choice == "☐ Automatic")
+                {
+                    needsagree = !needsagree;
+                }
+                else if (choice == "☑ Phrases" || choice == "☐ Phrases")
+                {
+                    seesphrases = !seesphrases;
+                }
             }
         }
     }
