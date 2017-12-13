@@ -175,8 +175,11 @@ read_key_settings(string settings)
     timeleftonkey = llList2Integer(oldkey, 14);
     currentanimation = llList2String(oldkey, 15);
 
-    notecardLine = 0;
-    kQuery = llGetNotecardLine(currentstate,0);
+    if (~llListFindList(types, (list)currentstate))
+    {
+        notecardLine = 0;
+        kQuery = llGetNotecardLine(currentstate,0);
+    }
 }
 
 handlemenuchoices(string choice, key ToucherID)
@@ -977,15 +980,7 @@ init()
     canfly = TRUE;
     winddown = TRUE;
     afk = FALSE;
-    if (dollID == "27f02017-bf33-49f9-b7b9-9317b7791fc0")
-    {
-        // CH05 Set Janoria as owner if we're Chandra!
-        MistressID = "f14aefed-e2a7-4716-a9ec-9b3540674e5f";
-    }
-    else
-    {
-        MistressID = NULL_KEY;
-    }
+    MistressID = NULL_KEY;
     timeleftonkey = 360;
     visible = TRUE;
     currentstate = "Regular";
