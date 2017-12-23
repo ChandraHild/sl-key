@@ -137,11 +137,8 @@ stop_key_listen()
     llListenRemove(key_listen);
     key_listen = 0;
     key_listen_time = 0;
-    if(key_startup)
-    {
-        startup_finish();
-    }
 }
+
 send_key_settings(key id)
 {
     stop_key_listen();
@@ -1013,6 +1010,8 @@ startup()
 
 startup_finish()
 {
+    key_startup = FALSE;
+
     if(afk)
     {
         startafk();
@@ -1112,14 +1111,16 @@ default
 
     touch_end(integer total_number)
     {
+        // Detects user UUID
+        key ToucherID = llDetectedKey(0);
+
         if (key_listen)
         {
             // Abort immediately if we're in key setup phase
+            llRegionSayTo(ToucherID, PUBLIC_CHANNEL, "Please wait a minute, the key is starting up.");
             return;
         }
 
-        // Detects user UUID
-        key ToucherID = llDetectedKey(0);
         if (llGetAttached() != ATTACH_BACK)
         {
             llRegionSayTo(ToucherID, PUBLIC_CHANNEL, "The key must be attached to the doll's back before you can use it.");
@@ -1246,13 +1247,18 @@ default
         {
             if (llGetUnixTime()-key_listen_time > 60)
             {
-                key_startup = FALSE;
                 stop_key_listen();
+
+                if (key_startup)
+                {
+                    startup_finish();
+                }
             }
-            if (key_startup)
+            else if (key_startup)
             {
-                return;
+                llRegionSay(channel_dialog-1, "key_init");
             }
+            return;
         }
 
         // Called every time interval
@@ -1317,7 +1323,7 @@ default
 
      link_message(integer source, integer num, string choice, key id)
      {
-        if (num == 2600)
+        if (num == 2060)
         {
             if (~llSubStringIndex(choice, "CTS/!Full Avatars"))
             {
@@ -1399,10 +1405,11 @@ default
                 {
                     if (notecardLine == 0)
                     {
+                        // Set wardrobe URL
+                        wardrobeURL = data;
                         if (!key_startup)
                         {
-                            // Set wardrobe URL
-                            wardrobeURL = data;
+
                             start_key_listen();
                         }
                     }
@@ -1428,7 +1435,7 @@ default
             {
                 if (key_startup)
                 {
-                    key_startup = FALSE;
+                    startup_finish();
                 }
                 else
                 {
@@ -1465,7 +1472,7 @@ default
         if (perm & PERMISSION_TAKE_CONTROLS)
         {
             llTakeControls(CONTROL_FWD | CONTROL_BACK | CONTROL_LEFT | CONTROL_RIGHT | CONTROL_ROT_LEFT |
-                           CONTROL_ROT_RIGHT | CONTROL_UP | CONTROL_DOWN | CONTROL_LBUTTON, TRUE, !(posetime || !timeleftonkey));
+                           CONTROL_ROT_RIGHT | CONTROL_UP | CONTROL_DOWN | CONTROL_LBUTTON, TRUE, timeleftonkey && !posetime);
         }
     }
 }
