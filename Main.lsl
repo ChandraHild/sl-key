@@ -639,27 +639,29 @@ stripmenu(string choice, key id)
 {
     if (choice == "Top")
     {
-        llOwnerSay("@detach:stomach=force,detach:left shoulder=force,detach:right shoulder=force,detach:left hand=force,detach:right hand=force,detach:r upper arm=force,detach:r forearm=force,detach:l upper arm=force,detach:l forearm=force,detach:chest=force,detach:left pec=force,detach:right pec=force");
-        llOwnerSay("@remoutfit:gloves=force,remoutfit:jacket=force,remoutfit:shirt=force");
+        llOwnerSay("@detachallthis:gloves=force,detachallthis:jacket=force,detachallthis:shirt=force");
     }
     else if (choice == "Bra")
     {
-        llOwnerSay("@remoutfit:undershirt=force");
+        llOwnerSay("@detachallthis:undershirt=force");
     }
     else if (choice == "Bottom")
     {
-        llOwnerSay("@detach:chin=force,detach:r lower leg=force,detach:l lower leg=force,detach:pelvis=force,detach:right hip=force,detach:left hip=force,detach");
-        llOwnerSay("@remoutfit:pants=force,remoutfit:skirt=force");
+        llOwnerSay("@detachallthis:pants=force,detachallthis:skirt=force");
     }
     else if (choice == "Panties")
     {
-        llOwnerSay("@remoutfit:underpants=force");
+        llOwnerSay("@detachallthis:underpants=force");
     }
     else if (choice == "Shoes")
     {
-        llOwnerSay("@detach:right foot=force,detach:left foot=force");
-        llOwnerSay("@remoutfit:shoes=force,remoutfit:socks=force");
+        llOwnerSay("@detachallthis:shoes=force,detachallthis:socks=force");
     }
+    else
+    {
+        return;
+    }
+    update_dialog_timestamp(ToucherID, "strip");
     llDialog(id, "Take off:",["Top","Bra","Bottom","Panties","Shoes"], channel_dialog);
 }
 
