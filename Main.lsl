@@ -1449,7 +1449,7 @@ default
     {
         if (perm & PERMISSION_TRIGGER_ANIMATION)
         {
-            if (posetime && llStringLength(currentanimation) > 0)
+            if (llStringLength(currentanimation) > 0)
             {
                 llStopAnimation(currentanimation);
                 llSleep(0.1);
