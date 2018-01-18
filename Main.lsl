@@ -661,7 +661,7 @@ stripmenu(string choice, key id)
     {
         return;
     }
-    update_dialog_timestamp(ToucherID, "strip");
+    update_dialog_timestamp(id, "strip");
     llDialog(id, "Take off:",["Top","Bra","Bottom","Panties","Shoes"], channel_dialog);
 }
 
@@ -1424,6 +1424,10 @@ default
                             llOwnerSay("@attachover:"+data+"=force");
                             llOwnerSay("@detachallthis:"+data+"=y");
                         }
+                    }
+                    else if (notecardLine == 2)
+                    {
+                        llMessageLinked(LINK_THIS, 52, data, NULL_KEY);
                     }
                     else
                     {
