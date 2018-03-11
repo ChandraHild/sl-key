@@ -214,10 +214,6 @@ handlemenuchoices(string choice, key ToucherID)
         string msg = "These change the personality of " + dollname + " She is currently a " + currentstate + ". What type of doll do you want her to be?";
         llOwnerSay(name + " is looking at your Transform options.");
         list choices = types;
-        if (ToucherID == dollID)
-        {
-            choices += "CHOICES";
-        }
 
         llDialog(ToucherID, msg, choices, channel_dialog);
     }
@@ -389,6 +385,23 @@ handlemenuchoices(string choice, key ToucherID)
 
         if (carrierID == NULL_KEY)
         {
+            if (needsagree)
+            {
+                pluslist = ["☐ Automatic"];
+            }
+            else
+            {
+                pluslist = ["☑ Automatic"];
+            }
+            if (seesphrases)
+            {
+                pluslist += "☑ Phrases";
+            }
+            else
+            {
+                pluslist += "☐ Phrases";
+            }
+
             if (candress)
             {
                 pluslist += "☑ Dressing";
@@ -452,7 +465,15 @@ handlemenuchoices(string choice, key ToucherID)
 
 optionsmenu(string choice, key id)
 {
-    if (choice == "☑ Detachable")
+    if (choice == "☑ Automatic" || choice == "☐ Automatic")
+    {
+        needsagree = !needsagree;
+    }
+    else if (choice == "☑ Phrases" || choice == "☐ Phrases")
+    {
+        seesphrases = !seesphrases;
+    }
+    else if (choice == "☑ Detachable")
     {
         detachable = FALSE;
         llOwnerSay("Your key cannot be detached.");
@@ -678,43 +699,7 @@ dressmenu(key id)
 
 transformmenu(string choice, key id, integer confirmed)
 {
-    if (id == dollID)
-    {
-        if (choice == "CHOICES")
-        {
-            list choices;
-            if (needsagree)
-            {
-                choices = ["☐ Automatic"];
-            }
-            else
-            {
-                choices = ["☑ Automatic"];
-            }
-            if (seesphrases)
-            {
-                choices += "☑ Phrases";
-            }
-            else
-            {
-                choices += "☐ Phrases";
-            }
-            update_dialog_timestamp(id, "transform");
-            llDialog(id, "Options", choices, channel_dialog);
-            return;
-        }
-        else if (choice == "☑ Automatic" || choice == "☐ Automatic")
-        {
-            needsagree = !needsagree;
-            return;
-        }
-        else if (choice == "☑ Phrases" || choice == "☐ Phrases")
-        {
-            seesphrases = !seesphrases;
-            return;
-        }
-    }
-    else if (needsagree && !confirmed)
+    if (id != dollID && needsagree && !confirmed)
     {
         if(!create_or_get_listen(dollID))
         {
