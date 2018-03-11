@@ -17,7 +17,8 @@ integer keylimit =   1800; //5 hours
 integer poselimit =  30;  //5 minutes
 
 list poses;
-list types;
+list bodies;
+list states;
 list currentphrases;
 list dialogUsers; // [key, listenhandle, timestamp, menu]
 
@@ -25,9 +26,11 @@ string newanimation;
 integer posetime;
 integer phrasetime;
 
-key kQuery;
+key kQueryBody;
+key kQueryState;
 key transformer;
-integer notecardLine;
+integer stateLine;
+integer bodyLine;
 
 key carrierID;
 
@@ -61,6 +64,7 @@ integer needsagree;
 integer seesphrases;
 
 string currentstate;
+string currentbody;
 
 integer timeleftonkey;
 string currentanimation;
@@ -145,7 +149,7 @@ send_key_settings(key id)
     llRegionSayTo(id, channel_dialog-1, (string)MistressID+","+currentstate+","+(string)visible+","+(string)detachable+","+(string)alwaysavailable
                                         +","+(string)pleasuredoll+","+(string)stuck+","+(string)canfly+","+(string)winddown+","+(string)afk
                                         +","+(string)needsagree+","+(string)seesphrases+","+(string)candress+","+(string)canbecomemistress
-                                        +","+(string)timeleftonkey+","+currentanimation);
+                                        +","+(string)timeleftonkey+","+currentanimation+","+currentbody);
     clear_old_dialogs(TRUE);
     llSleep(1.0);
     llOwnerSay("@clear,detachme=force");
@@ -171,11 +175,17 @@ read_key_settings(string settings)
     canbecomemistress = llList2Integer(oldkey, 13);
     timeleftonkey = llList2Integer(oldkey, 14);
     currentanimation = llList2String(oldkey, 15);
+    currentbody = llList2String(oldkey, 16);
 
-    if (~llListFindList(types, (list)currentstate))
+    if (~llListFindList(states, (list)currentstate))
     {
-        notecardLine = 0;
-        kQuery = llGetNotecardLine(currentstate,0);
+        stateLine = 0;
+        kQueryState = llGetNotecardLine("State-"+currentstate,0);
+    }
+    if (~llListFindList(bodies, (list)currentbody))
+    {
+        bodyLine = 0;
+        kQueryBody = llGetNotecardLine("Body-"+currentbody,0);
     }
 }
 
@@ -208,12 +218,21 @@ handlemenuchoices(string choice, key ToucherID)
         delete_listener(ToucherID);
         uncarry();
     }
-    else if (choice == "Type of Doll")
+    else if (choice == "Body")
     {
         update_dialog_timestamp(ToucherID, "transform");
-        string msg = "These change the personality of " + dollname + " She is currently a " + currentstate + ". What type of doll do you want her to be?";
+        string msg = "These change the body of " + dollname + " She is currently a " + currentbody + ". What type of doll do you want her to be?";
         llOwnerSay(name + " is looking at your Transform options.");
-        list choices = types;
+        list choices = bodies;
+
+        llDialog(ToucherID, msg, choices, channel_dialog);
+    }
+    else if (choice == "Mode")
+    {
+        update_dialog_timestamp(ToucherID, "state");
+        string msg = "These change the personality of " + dollname + " She is currently a " + currentstate + ". What type of doll do you want her to be?";
+        llOwnerSay(name + " is looking at your Modes.");
+        list choices = states;
 
         llDialog(ToucherID, msg, choices, channel_dialog);
     }
@@ -714,12 +733,28 @@ transformmenu(string choice, key id, integer confirmed)
         return;
     }
 
-    if (~llListFindList(types, (list)choice))
+    if (~llListFindList(bodies, (list)choice))
+    {
+        currentbody = choice;
+        bodyLine = 0;
+        transformer = id;
+        delete_listener(id);
+
+        kQueryBody = llGetNotecardLine("Body-"+choice,0);
+
+        llSleep(1.0);
+
+        llSay(0, dollname + " has changed to a " + currentbody + " body.");
+    }
+}
+
+statemenu(string choice, key id)
+{
+    if (~llListFindList(states, (list)choice))
     {
         currentstate = choice;
         currentphrases = [];
-        notecardLine = 0;
-        transformer = id;
+        stateLine = 0;
         delete_listener(id);
         // Changes over to current state being new state
         if (currentstate == "Display")
@@ -740,7 +775,7 @@ transformmenu(string choice, key id, integer confirmed)
             winddown = TRUE;
         }
 
-        kQuery = llGetNotecardLine(choice,0);
+        kQueryState = llGetNotecardLine("State-"+choice,0);
 
         llSleep(1.0);
 
@@ -869,11 +904,20 @@ reloadscripts()
         }
     }
 
-    types = [];
+    bodies = [];
+    states = [];
     n = llGetInventoryNumber(INVENTORY_NOTECARD);
     while(n)
     {
-        types += llGetInventoryName(INVENTORY_NOTECARD, --n);
+        list note = llParseStringKeepNulls(llGetInventoryName(INVENTORY_NOTECARD, --n), ["-"], []);
+        if (llList2String(note, 0) == "Body")
+        {
+            bodies += llList2String(note, 1);
+        }
+        else if (llList2String(note, 0) == "State")
+        {
+            states += llList2String(note, 1);
+        }
     }
 }
 
@@ -940,7 +984,7 @@ say_key_phrase()
     }
     else
     {
-        phrase += ", " + currentstate + "Doll ***";
+        phrase += ", " + currentstate + " Doll ***";
     }
     llOwnerSay(phrase);
 }
@@ -1145,13 +1189,13 @@ default
             }
             else
             {
-                msg = httpstart + "dollkeyselfinfo.htm\nYou are a " + currentstate + " doll.";
+                msg = httpstart + "dollkeyselfinfo.htm\nYou are a " + currentstate + " doll with a " + currentbody + " body.";
                 menu = ["Dress", "Options"];
                 if (!posetime)
                 {
                     menu += "Pose";
                 }
-                menu += "Type of Doll";
+                menu += ["Body", "Mode"];
             }
         }
         else if (carrierID)
@@ -1162,7 +1206,7 @@ default
                 menu += ["Place Down", "Pose"];
                 if (candress)
                 {
-                    menu += ["Dress", "Type of Doll"];
+                    menu += ["Dress", "Body", "Mode"];
                 }
                 if (posetime)
                 {
@@ -1190,7 +1234,7 @@ default
         else if (timeleftonkey)
         {
             // Not being carried, not collapsed
-            msg = dollname + " is a " + currentstate + " doll and likes to be treated like a doll. So feel free to use these options. The Carry option picks up " + dollname + " and temporarily makes her exclusively yours. " + httpstart + "communitydoll.htm for more info.";
+            msg = dollname + " is a " + currentstate + " doll with a " + currentbody + " body and likes to be treated like a doll. So feel free to use these options. The Carry option picks up " + dollname + " and temporarily makes her exclusively yours. " + httpstart + "communitydoll.htm for more info.";
             if (afk)
             {
                 msg += " She is currently marked AFK.";
@@ -1198,7 +1242,7 @@ default
             menu += "Carry";
             if (candress)
             {
-                menu += ["Dress", "Type of Doll"];
+                menu += ["Dress", "Body", "Mode"];
             }
             if (posetime)
             {
@@ -1350,6 +1394,10 @@ default
             {
                 transformmenu(choice, id, TRUE);
             }
+            else if (menu == "state")
+            {
+                statemenu(choice, id);
+            }
             else if (menu == "control")
             {
                 controlmenu(choice, id);
@@ -1384,13 +1432,13 @@ default
 
     dataserver(key query_id, string data)
     {
-        if (query_id == kQuery)
+        if (query_id == kQueryBody)
         {
             if (data != EOF)
             {
                 if (llStringLength(data) > 1)
                 {
-                    if (notecardLine == 0)
+                    if (bodyLine == 0)
                     {
                         // Set wardrobe URL
                         wardrobeURL = data;
@@ -1400,7 +1448,7 @@ default
                             start_key_listen();
                         }
                     }
-                    else if (notecardLine == 1)
+                    else if (bodyLine == 1)
                     {
                         if (!key_startup)
                         {
@@ -1410,17 +1458,13 @@ default
                             llOwnerSay("@detachallthis:"+data+"=y");
                         }
                     }
-                    else if (notecardLine == 2)
+                    else if (bodyLine == 2)
                     {
                         llMessageLinked(LINK_THIS, 52, data, NULL_KEY);
                     }
-                    else
-                    {
-                        currentphrases += data;
-                    }
                 }
-                notecardLine++;
-                kQuery = llGetNotecardLine(currentstate,notecardLine);
+                bodyLine++;
+                kQueryBody = llGetNotecardLine("Body-"+currentbody,bodyLine);
             }
             else
             {
@@ -1432,6 +1476,15 @@ default
                 {
                     dressmenu(transformer);
                 }
+            }
+        }
+        else if (query_id == kQueryState)
+        {
+            if (data != EOF)
+            {
+                currentphrases += data;
+                stateLine++;
+                kQueryState = llGetNotecardLine("State-"+currentstate,stateLine);
             }
         }
     }
