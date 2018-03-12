@@ -992,6 +992,7 @@ startup_finish()
         uncarry();
     }
 
+    llSleep(5.0);
     if (timeleftonkey)
     {
         animate(currentanimation);
@@ -1392,6 +1393,18 @@ default
                 }
                 else
                 {
+                    if (!key_listen)
+                    {
+                        llSleep(15.0);
+                        if (timeleftonkey)
+                        {
+                            animate(currentanimation);
+                        }
+                        else
+                        {
+                            collapse();
+                        }
+                    }
                     dressmenu(transformer);
                 }
             }
