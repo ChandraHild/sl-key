@@ -10,6 +10,7 @@ integer channel_dialog;
 integer key_listen = 0;
 integer key_listen_time = 0;
 integer key_startup;
+string key_size = "Regular";
 
 // assuming a clock interval of 10
 integer windamount = 360; //1 hour
@@ -1346,29 +1347,38 @@ default
             {
                 if (llStringLength(data) > 1)
                 {
-                    if (bodyLine == 0)
+                    list curline = llParseStringKeepNulls(data, ["="], []);
+                    string curopt = llList2String(curline, 0);
+                    string curdata = llList2String(curline, 1);
+                    if (curopt == "URL")
                     {
                         // Set wardrobe URL
-                        wardrobeURL = data;
-                        if (!key_startup)
-                        {
-
-                            start_key_listen();
-                        }
+                        wardrobeURL = curdata;
                     }
-                    else if (bodyLine == 1)
+                    else if (curopt == "Outfit")
                     {
                         if (!key_startup)
                         {
-                            llOwnerSay("@detachallthis:"+data+"=n");
+                            llOwnerSay("@detachallthis:"+curdata+"=n");
                             llOwnerSay("@remoutfit=force,detach=force");
-                            llOwnerSay("@attachover:"+data+"=force");
-                            llOwnerSay("@detachallthis:"+data+"=y");
+                            llOwnerSay("@attachover:"+curdata+"=force");
+                            llOwnerSay("@detachallthis:"+curdata+"=y");
                         }
                     }
-                    else if (bodyLine == 2)
+                    else if (curopt == "Folders")
                     {
-                        llMessageLinked(LINK_THIS, 52, data, NULL_KEY);
+                        llMessageLinked(LINK_THIS, 52, curdata, NULL_KEY);
+                    }
+                    else if (curopt == "KeySize")
+                    {
+                        if (key_size != curdata)
+                        {
+                            key_size = curdata;
+                            if (!key_startup)
+                            {
+                                start_key_listen();
+                            }
+                        }
                     }
                 }
                 bodyLine++;
