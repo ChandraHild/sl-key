@@ -2,7 +2,6 @@
 key ChristinaID = "42c7aaec-38bc-4b0c-94dd-ae562eb67e6d";
 key mainwinder = "64d26535-f390-4dc4-a371-a712b946daf8";
 string dollname;
-string httpstart = "See http://CommunityDolls.com/";
 string wardrobeURL = "";
 key dollID;
 
@@ -17,10 +16,6 @@ integer windamount = 360; //1 hour
 integer keylimit =   1800; //5 hours
 integer poselimit =  30;  //5 minutes
 
-list poses;
-list bodies;
-list states;
-list currentphrases;
 list dialogUsers; // [key, listenhandle, timestamp, menu]
 
 string newanimation;
@@ -29,23 +24,14 @@ integer phrasetime;
 
 key kQueryBody;
 key kQueryState;
+key kQueryStateLen;
+key kQueryStartup;
 key transformer;
-integer stateLine;
+integer num_phrases;
 integer bodyLine;
+integer startupLine;
 
 key carrierID;
-
-integer firstStart;
-list startupMessages = [ "Dolls are now your sisters. They understand you. Feel that.",
-                         "Feel how beautiful you are. You were always beautiful. It is now just more obvious because you are a doll.",
-                         "Tendrils from the key have grown into your body. The key is becoming a part of you. Imagine that as vividly as you can",
-                         "You are now dependent on other people for life. Everyone is dependent. We dolls are just much more dependent. We dolls just feel it more. You now accept that.",
-                         "Feel how wonderful it is to be liked. Everyone wants to be liked. We dolls just feel it more. You now accept that.",
-                         "Feel how wonderful it would be to be displayed and everyone just admire you for your beauty.",
-                         "The hormones are relaxing you and making you feel comfortable with being a doll. Imagine that as vividly as you can.",
-                         "The tendrils are releasing doll hormones into your body. Imagine that as vividly as you can.", 
-                         "Tendrils from the key are growing into your back. Imagine that as vividly as you can",
-                         "You feel a key being put on your back. Imagine that as vividly as you can." ];
 
 // Variables to transfer between keys
 key MistressID;
@@ -78,7 +64,7 @@ integer create_or_get_listen(key id)
         update_dialog_timestamp(id, "main");
         return TRUE;
     }
-    else if (llGetListLength(dialogUsers) >= 12)
+    else if (llGetListLength(dialogUsers) >= 8)
     {
         return FALSE;
     }
@@ -110,7 +96,7 @@ clear_old_dialogs(integer clearAll)
     integer numDialogs = llGetListLength(dialogUsers)/4;
     integer curTime = llGetUnixTime();
     integer i;
-    for (i = 0; i < numDialogs; i++)
+    for (i = 0; i < numDialogs; ++i)
     {
         if (clearAll || curTime - llList2Integer(dialogUsers, i*4+2)  > 60)
         {
@@ -178,12 +164,11 @@ read_key_settings(string settings)
     currentanimation = llList2String(oldkey, 15);
     currentbody = llList2String(oldkey, 16);
 
-    if (~llListFindList(states, (list)currentstate))
+    if (llGetInventoryType("State-"+currentstate) == INVENTORY_NOTECARD)
     {
-        stateLine = 0;
-        kQueryState = llGetNotecardLine("State-"+currentstate,0);
+        kQueryStateLen = llGetNumberOfNotecardLines("State-"+currentstate);
     }
-    if (~llListFindList(bodies, (list)currentbody))
+    if (llGetInventoryType("Body-"+currentbody) == INVENTORY_NOTECARD)
     {
         bodyLine = 0;
         kQueryBody = llGetNotecardLine("Body-"+currentbody,0);
@@ -215,7 +200,16 @@ handlemenuchoices(string choice, key ToucherID)
         update_dialog_timestamp(ToucherID, "transform");
         string msg = "These change the body of " + dollname + " She is currently a " + currentbody + ". What type of doll do you want her to be?";
         llOwnerSay(name + " is looking at your Transform options.");
-        list choices = bodies;
+        integer n = llGetInventoryNumber(INVENTORY_NOTECARD);
+        list choices = [];
+        while(n)
+        {
+            list note = llParseStringKeepNulls(llGetInventoryName(INVENTORY_NOTECARD, --n), ["-"], []);
+            if (llList2String(note, 0) == "Body")
+            {
+                choices += llList2String(note, 1);
+            }
+        }
 
         llDialog(ToucherID, msg, choices, channel_dialog);
     }
@@ -224,15 +218,38 @@ handlemenuchoices(string choice, key ToucherID)
         update_dialog_timestamp(ToucherID, "state");
         string msg = "These change the personality of " + dollname + " She is currently a " + currentstate + ". What type of doll do you want her to be?";
         llOwnerSay(name + " is looking at your Modes.");
-        list choices = states;
+        integer n = llGetInventoryNumber(INVENTORY_NOTECARD);
+        list choices = [];
+        while(n)
+        {
+            list note = llParseStringKeepNulls(llGetInventoryName(INVENTORY_NOTECARD, --n), ["-"], []);
+            if (llList2String(note, 0) == "State")
+            {
+                choices += llList2String(note, 1);
+            }
+        }
 
         llDialog(ToucherID, msg, choices, channel_dialog);
     }
     else if (choice == "Pose")
     {
         update_dialog_timestamp(ToucherID, "pose");
-        list poselist = poses;
-        llDialog(ToucherID, "Choose a pose", poselist , channel_dialog);
+        list poses = [];
+        integer n = llGetInventoryNumber(INVENTORY_ANIMATION);
+        if (n > 11)
+        {
+            n = 11;
+        }
+        while(n)
+        {
+            string thispose = llGetInventoryName(INVENTORY_ANIMATION, --n);
+            if (thispose != "collapse")
+            {
+                poses += thispose;
+            }
+        }
+
+        llDialog(ToucherID, "Choose a pose", poses , channel_dialog);
     }
     else if (choice == "Unpose")
     {
@@ -296,7 +313,7 @@ handlemenuchoices(string choice, key ToucherID)
         canbecomemistress = FALSE;
         MistressID = ToucherID;
         llOwnerSay("The person carrying you has taken over as your controller.");
-        string msg = "You are now " + dollname + "'s controller. See " + httpstart + "controller.htm";
+        string msg = "You are now " + dollname + "'s controller. See http://CommunityDolls.com/controller.htm";
         RefreshRLV();
         llDialog(ToucherID,msg,["OK"] , 9999);
     }
@@ -308,7 +325,7 @@ handlemenuchoices(string choice, key ToucherID)
         if (ToucherID == dollID)
         {
             // We're accessing our own options
-            msg = httpstart + "keychoices.htm for explanation.";
+            msg = "See http://CommunityDolls.com/keychoices.htm for explanation.";
             if (needsagree)
             {
                 pluslist = ["☐ Automatic"];
@@ -338,7 +355,7 @@ handlemenuchoices(string choice, key ToucherID)
         else if (ToucherID == MistressID || ToucherID == ChristinaID)
         {
             // Owner is accessing our options
-            msg = "See " + httpstart + "controller.htm Choose what you want to happen";
+            msg = "See http://CommunityDolls.com/controller.htm Choose what you want to happen";
             pluslist = ["Drop control"];
             ToucherIsOwner = TRUE;
         }
@@ -612,7 +629,7 @@ transformmenu(string choice, key id, integer confirmed)
         return;
     }
 
-    if (~llListFindList(bodies, (list)choice))
+    if (llGetInventoryType("Body-"+choice) == INVENTORY_NOTECARD)
     {
         currentbody = choice;
         bodyLine = 0;
@@ -629,11 +646,9 @@ transformmenu(string choice, key id, integer confirmed)
 
 statemenu(string choice, key id)
 {
-    if (~llListFindList(states, (list)choice))
+    if (llGetInventoryType("State-"+choice) == INVENTORY_NOTECARD)
     {
         currentstate = choice;
-        currentphrases = [];
-        stateLine = 0;
         delete_listener(id);
         // Changes over to current state being new state
         if (currentstate == "Display")
@@ -653,8 +668,6 @@ statemenu(string choice, key id)
         {
             winddown = TRUE;
         }
-
-        kQueryState = llGetNotecardLine("State-"+choice,0);
 
         llSleep(1.0);
 
@@ -752,40 +765,6 @@ aochange(string choice)
     //_CH23 \/
 }
 
-reloadscripts()
-{
-    poses = [];
-    integer n = llGetInventoryNumber(INVENTORY_ANIMATION);
-    if (n > 11)
-    {
-        n = 11;
-    }
-    while(n)
-    {
-        string thispose = llGetInventoryName(INVENTORY_ANIMATION, --n);
-        if (thispose != "collapse")
-        {
-            poses += thispose;
-        }
-    }
-
-    bodies = [];
-    states = [];
-    n = llGetInventoryNumber(INVENTORY_NOTECARD);
-    while(n)
-    {
-        list note = llParseStringKeepNulls(llGetInventoryName(INVENTORY_NOTECARD, --n), ["-"], []);
-        if (llList2String(note, 0) == "Body")
-        {
-            bodies += llList2String(note, 1);
-        }
-        else if (llList2String(note, 0) == "State")
-        {
-            states += llList2String(note, 1);
-        }
-    }
-}
-
 uncarry()
 {
     if (carrierID != MistressID)
@@ -797,55 +776,11 @@ uncarry()
     RefreshRLV();
 }
 
-say_key_phrase()
-{
-    integer i = (integer) llFrand(llGetListLength(currentphrases));
-    string phrase  = llList2String(currentphrases, i);
-    if (llGetSubString(phrase,0,0) == "*")
-    {
-        phrase = llGetSubString(phrase,1,-1);
-        float r = llFrand(3);
-        if (r < 1.0)
-        {
-            phrase = "*** feel your need to " + phrase;
-        }
-        else if (r < 2.0)
-        {
-            phrase = "*** feel your desire to " + phrase;
-        }
-        else
-        {
-            if (currentstate  == "Domme")
-            {
-                phrase = "*** You like to " + phrase;
-            }
-            else
-            {
-                phrase = "*** feel how people like you to " + phrase;
-            }
-        }
-    }
-    else
-    {
-        phrase = "*** " + phrase;
-    }
-    if (currentstate == "Regular")
-    {
-        phrase += " ***";
-    }
-    else
-    {
-        phrase += ", " + currentstate + " Doll ***";
-    }
-    llOwnerSay(phrase);
-}
-
 // First time script setup
 init()
 {
     dollID = llGetOwner();
     channel_dialog = -llAbs((integer)("0x" + llGetSubString(dollID,30,-1))) -1;
-    firstStart = llGetListLength(startupMessages);
     posetime = 0;
     carrierID = NULL_KEY;
     detachable = TRUE;
@@ -863,8 +798,6 @@ init()
     timeleftonkey = 360;
     visible = TRUE;
     currentstate = "Regular";
-
-    reloadscripts();
 }
 
 // Things to do every time the key is worn or we log in
@@ -879,6 +812,7 @@ startup()
         return;
     }
     key_startup = TRUE;
+    kQueryStateLen = llGetNumberOfNotecardLines("State-"+currentstate);
     start_key_listen();
     llRegionSay(channel_dialog-1, "key_init");
     // Clock is accessed every ten seconds;
@@ -1035,10 +969,6 @@ default
         {
             llResetScript();
         }
-        if (change & CHANGED_INVENTORY)
-        {
-            reloadscripts();
-        }
         if (change & CHANGED_TELEPORT)
         {
             RefreshRLV();
@@ -1094,7 +1024,7 @@ default
             }
             else
             {
-                msg = httpstart + "dollkeyselfinfo.htm\nYou are a " + currentstate + " doll with a " + currentbody + " body.";
+                msg = "See http://CommunityDolls.com/dollkeyselfinfo.htm\nYou are a " + currentstate + " doll with a " + currentbody + " body.";
                 menu = ["Dress", "Options"];
                 if (!posetime)
                 {
@@ -1139,7 +1069,7 @@ default
         else if (timeleftonkey)
         {
             // Not being carried, not collapsed
-            msg = dollname + " is a " + currentstate + " doll with a " + currentbody + " body and likes to be treated like a doll. So feel free to use these options. The Carry option picks up " + dollname + " and temporarily makes her exclusively yours. " + httpstart + "communitydoll.htm for more info.";
+            msg = dollname + " is a " + currentstate + " doll with a " + currentbody + " body and likes to be treated like a doll. So feel free to use these options. The Carry option picks up " + dollname + " and temporarily makes her exclusively yours. See http://CommunityDolls.com/communitydoll.htm for more info.";
             if (afk)
             {
                 msg += " She is currently marked AFK.";
@@ -1171,13 +1101,9 @@ default
 
     timer()
     {
-        if (firstStart)
+        if (startupLine != -1)
         {
-            llOwnerSay(llList2String(startupMessages, --firstStart));
-            if(!firstStart)
-            {
-                startupMessages = [];
-            }
+            kQueryStartup = llGetNotecardLine("Startup-Messages",startupLine);
         }
         if (key_listen)
         {
@@ -1252,7 +1178,8 @@ default
             if (++phrasetime >= 12)
             {
                 phrasetime = 0;
-                say_key_phrase();
+                integer i = (integer) llFrand(num_phrases);
+                kQueryState = llGetNotecardLine("State-"+currentstate,i);
             }
         }
      }
@@ -1373,7 +1300,7 @@ default
                         }
                     }
                 }
-                bodyLine++;
+                ++bodyLine;
                 kQueryBody = llGetNotecardLine("Body-"+currentbody,bodyLine);
             }
             else
@@ -1404,10 +1331,60 @@ default
         {
             if (data != EOF)
             {
-                currentphrases += data;
-                stateLine++;
-                kQueryState = llGetNotecardLine("State-"+currentstate,stateLine);
+                if (llGetSubString(data,0,0) == "*")
+                {
+                    data = llGetSubString(data,1,-1);
+                    float r = llFrand(3);
+                    if (r < 1.0)
+                    {
+                        data = "*** feel your need to " + data;
+                    }
+                    else if (r < 2.0)
+                    {
+                        data = "*** feel your desire to " + data;
+                    }
+                    else
+                    {
+                        if (currentstate  == "Domme")
+                        {
+                            data = "*** You like to " + data;
+                        }
+                        else
+                        {
+                            data = "*** feel how people like you to " + data;
+                        }
+                    }
+                }
+                else
+                {
+                    data = "*** " + data;
+                }
+                if (currentstate == "Regular")
+                {
+                    data += " ***";
+                }
+                else
+                {
+                    data += ", " + currentstate + " Doll ***";
+                }
+                llOwnerSay(data);
             }
+        }
+        else if (query_id == kQueryStartup)
+        {
+            if (data == EOF)
+            {
+                startupLine = -1;
+            }
+            else
+            {
+                ++startupLine;
+                llOwnerSay(data);
+            }
+        }
+        else if (query_id == kQueryStateLen)
+        {
+            num_phrases = (integer)data;
         }
     }
 
