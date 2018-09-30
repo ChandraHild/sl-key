@@ -558,12 +558,10 @@ optionsmenu(string choice, key id)
     else if (choice == "☐ AFK")
     {
         startafk();
-        afk = TRUE;
     }
     else if (choice == "☑ AFK")
     {
         stopafk();
-        afk = FALSE;
         timeleftonkey =  timeleftonkey / 2;
     }
 
@@ -685,6 +683,7 @@ startafk()
 {
     // CH06
     winddown = FALSE;
+    afk = TRUE;
 
     //_M01C
     llTargetOmega(ZERO_VECTOR, 0.0, 0.0);
@@ -694,6 +693,7 @@ startafk()
 stopafk()
 {
     winddown = TRUE;
+    afk = FALSE;
 
     if (!timeleftonkey)
     {
