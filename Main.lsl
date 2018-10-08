@@ -351,6 +351,8 @@ handlemenuchoices(string choice, key ToucherID)
             {
                 pluslist += "☐ Dressing";
             }
+
+            pluslist += "ResetCTS";
         }
         else if (ToucherID == MistressID || ToucherID == ChristinaID)
         {
@@ -563,6 +565,11 @@ optionsmenu(string choice, key id)
     {
         stopafk();
         timeleftonkey =  timeleftonkey / 2;
+    }
+    else if (choice == "ResetCTS")
+    {
+        llResetOtherScript("Wear");
+        llOwnerSay("CTS Wardrobe Reset");
     }
 
     //_M02
