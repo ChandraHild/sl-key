@@ -1000,6 +1000,13 @@ default
             return;
         }
 
+        vector pos = llDetectedPos(0);
+        float dist = llVecDist(pos, llGetPos());
+        if (dist > 10.0)
+        {
+            llRegionSayTo(ToucherID, PUBLIC_CHANNEL, "You are too far away to use the key. Please get closer and try again.");
+            return;
+        }
         if (!create_or_get_listen(ToucherID))
         {
             llRegionSayTo(ToucherID, PUBLIC_CHANNEL, "The key is too busy to be played with, please try again in a little bit.");
