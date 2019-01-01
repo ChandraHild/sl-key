@@ -259,9 +259,14 @@ handlemenuchoices(string choice, key ToucherID)
             llRequestPermissions(dollID, PERMISSION_TAKE_CONTROLS | PERMISSION_TRIGGER_ANIMATION);
         }
     }
-    else if (choice == "allow takeover")
+    else if (choice == "☑ Takeover")
     {
-        delete_listener(ToucherID);
+        llOwnerSay("There is no option for someone to become your controller.");
+        canbecomemistress = FALSE;
+    }
+    else if (choice == "☐ Takeover")
+    {
+        llOwnerSay("Anyone carrying you can choose to be your controller.");
         canbecomemistress = TRUE;
     }
     else if (choice == "Wind")
@@ -422,17 +427,6 @@ handlemenuchoices(string choice, key ToucherID)
             {
                 pluslist += "☐ Pleasure";
             }
-            if (MistressID == NULL_KEY)
-            {
-                if (canbecomemistress)
-                {
-                    pluslist += "☑ Takeover";
-                }
-                else
-                {
-                    pluslist += "☐ Takeover";
-                }
-            }
             if (visible)
             {
                 pluslist += "☑ Visible";
@@ -516,17 +510,6 @@ optionsmenu(string choice, key id)
         llOwnerSay("@tplure:" + (string) MistressID + "=rem,accepttp:" + (string) MistressID + "=rem");
         MistressID = NULL_KEY;
         RefreshRLV();
-    }
-
-    else if (choice == "☑ Takeover")
-    {
-        llOwnerSay("There is no option for someone to become your controller.");
-        canbecomemistress = FALSE;
-    }
-    else if (choice == "☐ Takeover")
-    {
-        llOwnerSay("Anyone carrying you can choose to be your controller.");
-        canbecomemistress = TRUE;
     }
     else if (choice == "Take off key")
     {
@@ -1031,10 +1014,6 @@ default
             {
                 msg = "You are currently being carried";
                 menu = ["OK", "Options"];
-                if (MistressID == NULL_KEY && !canbecomemistress)
-                {
-                    menu += "allow takeover";
-                }
             }
             else
             {
@@ -1045,6 +1024,17 @@ default
                     menu += "Pose";
                 }
                 menu += ["Body", "Mode"];
+            }
+            if (MistressID == NULL_KEY)
+            {
+                if (canbecomemistress)
+                {
+                    menu += "☑ Takeover";
+                }
+                else
+                {
+                    menu += "☐ Takeover";
+                }
             }
         }
         else if (carrierID)
