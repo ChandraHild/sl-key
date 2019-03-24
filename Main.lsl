@@ -164,6 +164,7 @@ read_key_settings(string settings)
     currentanimation = llList2String(oldkey, 15);
     currentbody = llList2String(oldkey, 16);
 
+    llMessageLinked(LINK_ALL_CHILDREN, 17, currentstate, "");
     if (llGetInventoryType("State-"+currentstate) == INVENTORY_NOTECARD)
     {
         kQueryStateLen = llGetNumberOfNotecardLines("State-"+currentstate);
@@ -637,6 +638,7 @@ statemenu(string choice, key id)
     if (llGetInventoryType("State-"+choice) == INVENTORY_NOTECARD)
     {
         currentstate = choice;
+        llMessageLinked(LINK_ALL_CHILDREN, 17, currentstate, "");
         delete_listener(id);
         // Changes over to current state being new state
         if (currentstate == "Display")
