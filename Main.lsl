@@ -138,6 +138,7 @@ send_key_settings(key id)
                                         +","+(string)needsagree+","+(string)seesphrases+","+(string)candress+","+(string)canbecomemistress
                                         +","+(string)timeleftonkey+","+currentanimation+","+currentbody);
     clear_old_dialogs(TRUE);
+    currentstate = "Loading";
     llSleep(1.0);
     llOwnerSay("@clear,detachme=force");
 }
@@ -169,6 +170,10 @@ read_key_settings(string settings)
     {
         kQueryStateLen = llGetNumberOfNotecardLines("State-"+currentstate);
     }
+    else
+    {
+        num_phrases = 0;
+    }
     if (llGetInventoryType("Body-"+currentbody) == INVENTORY_NOTECARD)
     {
         bodyLine = 0;
@@ -199,7 +204,7 @@ handlemenuchoices(string choice, key ToucherID)
     else if (choice == "Body")
     {
         update_dialog_timestamp(ToucherID, "transform");
-        string msg = "These change the body of " + dollname + " She is currently a " + currentbody + ". What type of doll do you want her to be?";
+        string msg = "These change the body of " + dollname + ". She is currently a " + currentbody + " doll. What type of doll do you want her to be?";
         llOwnerSay(name + " is looking at your Transform options.");
         integer n = llGetInventoryNumber(INVENTORY_NOTECARD);
         list choices = [];
@@ -217,7 +222,7 @@ handlemenuchoices(string choice, key ToucherID)
     else if (choice == "Mode")
     {
         update_dialog_timestamp(ToucherID, "state");
-        string msg = "These change the personality of " + dollname + " She is currently a " + currentstate + ". What type of doll do you want her to be?";
+        string msg = "These change the personality of " + dollname + " She is currently a " + currentstate + " doll. What type of doll do you want her to be?";
         llOwnerSay(name + " is looking at your Modes.");
         integer n = llGetInventoryNumber(INVENTORY_NOTECARD);
         list choices = [];
@@ -789,7 +794,7 @@ init()
     MistressID = NULL_KEY;
     timeleftonkey = 360;
     visible = TRUE;
-    currentstate = "Regular";
+    currentstate = "Loading";
 }
 
 // Things to do every time the key is worn or we log in
@@ -803,14 +808,30 @@ startup()
         llOwnerSay("Please detach your key and wear it on your spine");
         return;
     }
-    key_startup = TRUE;
-    kQueryStateLen = llGetNumberOfNotecardLines("State-"+currentstate);
-    start_key_listen();
-    llRegionSay(channel_dialog-1, "key_init");
     // Clock is accessed every ten seconds;
     llSetTimerEvent(10.0);
     dollname = llGetDisplayName(dollID);
     llOwnerSay("@detach=n");
+
+    key_startup = TRUE;
+    if (llGetInventoryType("State-"+currentstate) == INVENTORY_NOTECARD)
+    {
+        kQueryStateLen = llGetNumberOfNotecardLines("State-"+currentstate);
+    }
+    else
+    {
+        num_phrases = 0;
+    }
+
+    if (currentstate == "Loading")
+    {
+        start_key_listen();
+        llRegionSay(channel_dialog-1, "key_init");
+    }
+    else
+    {
+        startup_finish();
+    }
 }
 
 startup_finish()
