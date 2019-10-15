@@ -404,7 +404,7 @@ handlemenuchoices(string choice, key ToucherID)
             }
             else if (ToucherIsOwner)
             {
-                pluslist += "☐ Auto TP";
+                pluslist += "☑ Auto TP";
             }
 
             if (!stuck)
@@ -1068,8 +1068,9 @@ default
                 menu += ["Place Down", "Pose"];
                 if (candress)
                 {
-                    menu += ["Dress", "Body", "Mode"];
+                    menu += ["Dress", "Body"];
                 }
+                menu += "Mode";
                 if (posetime)
                 {
                     menu += "Unpose";
@@ -1104,8 +1105,9 @@ default
             menu += "Carry";
             if (candress)
             {
-                menu += ["Dress", "Body", "Mode"];
+                menu += ["Dress", "Body"];
             }
+            menu += "Mode";
             if (posetime)
             {
                 menu += "Unpose";
