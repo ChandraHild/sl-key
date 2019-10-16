@@ -130,6 +130,18 @@ stop_key_listen()
     key_listen_time = 0;
 }
 
+load_phrases()
+{
+    if (llGetInventoryType("State-"+currentstate) == INVENTORY_NOTECARD)
+    {
+        kQueryStateLen = llGetNumberOfNotecardLines("State-"+currentstate);
+    }
+    else
+    {
+        num_phrases = 0;
+    }
+}
+
 send_key_settings(key id)
 {
     stop_key_listen();
@@ -166,14 +178,7 @@ read_key_settings(string settings)
     currentbody = llList2String(oldkey, 16);
 
     llMessageLinked(LINK_ALL_CHILDREN, 17, currentstate, "");
-    if (llGetInventoryType("State-"+currentstate) == INVENTORY_NOTECARD)
-    {
-        kQueryStateLen = llGetNumberOfNotecardLines("State-"+currentstate);
-    }
-    else
-    {
-        num_phrases = 0;
-    }
+    load_phrases();
     if (llGetInventoryType("Body-"+currentbody) == INVENTORY_NOTECARD)
     {
         bodyLine = 0;
@@ -644,6 +649,7 @@ statemenu(string choice, key id)
     {
         currentstate = choice;
         llMessageLinked(LINK_ALL_CHILDREN, 17, currentstate, "");
+        load_phrases();
         delete_listener(id);
         // Changes over to current state being new state
         if (currentstate == "Display")
@@ -814,14 +820,7 @@ startup()
     llOwnerSay("@detach=n");
 
     key_startup = TRUE;
-    if (llGetInventoryType("State-"+currentstate) == INVENTORY_NOTECARD)
-    {
-        kQueryStateLen = llGetNumberOfNotecardLines("State-"+currentstate);
-    }
-    else
-    {
-        num_phrases = 0;
-    }
+    load_phrases();
 
     if (currentstate == "Loading")
     {
