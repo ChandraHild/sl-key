@@ -245,7 +245,11 @@ handlemenuchoices(string choice, key ToucherID)
             list note = llParseStringKeepNulls(llGetInventoryName(INVENTORY_NOTECARD, --n), ["-"], []);
             if (llList2String(note, 0) == "State")
             {
-                choices += llList2String(note, 1);
+                string mode = llList2String(note, 1);
+                if (mode != "Regular" || ToucherID == dollID || ToucherID == MistressID)
+                {
+                    choices += mode;
+                }
             }
         }
 
