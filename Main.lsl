@@ -110,6 +110,15 @@ clear_old_dialogs(integer clearAll)
     }
 }
 
+string checkbox(integer checkVar)
+{
+    if (checkVar)
+    {
+        return "☑";
+    }
+    return "☐";
+}
+
 start_key_listen()
 {
     if (!key_listen)
@@ -342,33 +351,7 @@ handlemenuchoices(string choice, key ToucherID)
         {
             // We're accessing our own options
             msg = "See http://CommunityDolls.com/keychoices.htm for explanation.";
-            if (needsagree)
-            {
-                pluslist = ["☐ Automatic"];
-            }
-            else
-            {
-                pluslist = ["☑ Automatic"];
-            }
-            if (seesphrases)
-            {
-                pluslist += "☑ Phrases";
-            }
-            else
-            {
-                pluslist += "☐ Phrases";
-            }
-
-            if (candress)
-            {
-                pluslist += "☑ Dressing";
-            }
-            else
-            {
-                pluslist += "☐ Dressing";
-            }
-
-            pluslist += "ResetCTS";
+            pluslist = [checkbox(!needsagree) + " Automatic", checkbox(seesphrases) + " Phrases", checkbox(candress) + " Dressing", "ResetCTS"];
         }
         else if (ToucherID == MistressID || ToucherID == ChristinaID)
         {
@@ -383,14 +366,7 @@ handlemenuchoices(string choice, key ToucherID)
             return;
         }
         update_dialog_timestamp(ToucherID, "options");
-        if (afk)
-        {
-            pluslist += "☑ AFK";
-        }
-        else
-        {
-            pluslist += "☐ AFK";
-        }
+        pluslist += [checkbox(afk) + " AFK"];
 
         if (carrierID == NULL_KEY || ToucherID != dollID)
         {
@@ -430,22 +406,7 @@ handlemenuchoices(string choice, key ToucherID)
                 pluslist += "☐ Flying";
             }
 
-            if (pleasuredoll)
-            {
-                pluslist += "☑ Pleasure";
-            }
-            else
-            {
-                pluslist += "☐ Pleasure";
-            }
-            if (visible)
-            {
-                pluslist += "☑ Visible";
-            }
-            else
-            {
-                pluslist += "☐ Visible";
-            }
+            pluslist += [checkbox(pleasuredoll) + " Pleasure", checkbox(visible) + " Visible"];
         }
         llDialog(ToucherID, msg, pluslist, channel_dialog);
     }
@@ -824,6 +785,7 @@ startup()
 
     if (currentstate == "Loading")
     {
+        currentstate = "Regular";
         start_key_listen();
         llRegionSay(channel_dialog-1, "key_init");
     }
