@@ -2,12 +2,12 @@
 key ChristinaID = "42c7aaec-38bc-4b0c-94dd-ae562eb67e6d";
 key mainwinder = "64d26535-f390-4dc4-a371-a712b946daf8";
 string dollname;
-string wardrobeURL = "";
+string wardrobeURL;
 key dollID;
 
 integer channel_dialog;
-integer key_listen = 0;
-integer key_listen_time = 0;
+integer key_listen;
+integer key_listen_time;
 integer key_startup;
 string key_size = "Regular";
 
@@ -35,25 +35,25 @@ key carrierID;
 
 // Variables to transfer between keys
 key MistressID;
-integer visible;
-integer detachable;
+integer visible = TRUE;
+integer detachable = TRUE;
 integer alwaysavailable;
 integer pleasuredoll;
 integer stuck;
-integer canfly;
-integer winddown;
+integer canfly = TRUE;
+integer winddown = TRUE;
 integer afk;
 
-integer candress;
+integer candress = TRUE;
 integer canbecomemistress;
 
 integer needsagree;
-integer seesphrases;
+integer seesphrases = TRUE;
 
-string currentstate;
+string currentstate = "Loading";
 string currentbody;
 
-integer timeleftonkey;
+integer timeleftonkey = 360;
 string currentanimation;
 
 integer create_or_get_listen(key id)
@@ -744,30 +744,6 @@ uncarry()
     RefreshRLV();
 }
 
-// First time script setup
-init()
-{
-    dollID = llGetOwner();
-    channel_dialog = -llAbs((integer)("0x" + llGetSubString(dollID,30,-1))) -1;
-    posetime = 0;
-    carrierID = NULL_KEY;
-    detachable = TRUE;
-    alwaysavailable = FALSE;
-    pleasuredoll = FALSE;
-    needsagree = FALSE;
-    seesphrases = TRUE;
-    stuck = FALSE; //problem with being stuck on private land -- no way to get off.
-    candress = TRUE;
-    canbecomemistress = FALSE;
-    canfly = TRUE;
-    winddown = TRUE;
-    afk = FALSE;
-    MistressID = NULL_KEY;
-    timeleftonkey = 360;
-    visible = TRUE;
-    currentstate = "Loading";
-}
-
 // Things to do every time the key is worn or we log in
 startup()
 {
@@ -932,7 +908,9 @@ default
 {
     state_entry()
     {
-        init();
+        // First time script setup
+        dollID = llGetOwner();
+        channel_dialog = -llAbs((integer)("0x" + llGetSubString(dollID,30,-1))) -1;
         startup();
     }
 
