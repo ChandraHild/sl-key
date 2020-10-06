@@ -217,21 +217,8 @@ handlemenuchoices(string choice, key ToucherID)
     }
     else if (choice == "Body")
     {
-        update_dialog_timestamp(ToucherID, "transform");
-        string msg = "These change the body of " + dollname + ". She is currently a " + currentbody + " doll. What type of doll do you want her to be?";
         llOwnerSay(name + " is looking at your Transform options.");
-        integer n = llGetInventoryNumber(INVENTORY_NOTECARD);
-        list choices = [];
-        while(n)
-        {
-            list note = llParseStringKeepNulls(llGetInventoryName(INVENTORY_NOTECARD, --n), ["-"], []);
-            if (llList2String(note, 0) == "Body")
-            {
-                choices += llList2String(note, 1);
-            }
-        }
-
-        llDialog(ToucherID, msg, choices, channel_dialog);
+        show_transform_dialog("", ToucherID);
     }
     else if (choice == "Mode")
     {
@@ -569,15 +556,56 @@ dressmenu(key id)
 {
     // Open dress menu
     delete_listener(id);
-    if (wardrobeURL == "")
+    if (wardrobeURL)
+    {
+        llLoadURL(id, "Please choose an outfit at this website.", wardrobeURL);
+    }
+    else
     {
         llDialog(id, "No outfits found", ["OK"], 9999);
     }
-    llLoadURL(id, "Please choose an outfit at this website.", wardrobeURL);
 }
 
-transformmenu(string choice, key id, integer confirmed)
+show_transform_dialog(string subtype, key id)
 {
+    update_dialog_timestamp(id, "transform|"+subtype);
+    string msg = "These change the body of " + dollname + ". She is currently a " + currentbody + " doll. What type of doll do you want her to be?";
+    integer n = llGetInventoryNumber(INVENTORY_NOTECARD);
+    list choices = [];
+    while(n)
+    {
+        list note = llParseStringKeepNulls(llGetInventoryName(INVENTORY_NOTECARD, --n), ["-"], []);
+        if (llList2String(note, 0) == "Body")
+        {
+            if (subtype)
+            {
+                if (llList2String(note, 1) == subtype)
+                {
+                    choices += llList2String(note, 2);
+                }
+            }
+            else
+            {
+                string choice = llList2String(note, 1);
+                if (!~llListFindList(choices, (list)choice))
+                {
+                    choices += choice;
+                }
+            }
+        }
+    }
+
+    llDialog(id, msg, choices, channel_dialog);
+}
+
+transformmenu(string choice, string subchoice, key id, integer confirmed)
+{
+    if (subchoice == "")
+    {
+        show_transform_dialog(choice, id);
+        return;
+    }
+
     if (id != dollID && needsagree && !confirmed)
     {
         if(!create_or_get_listen(dollID))
@@ -593,18 +621,24 @@ transformmenu(string choice, key id, integer confirmed)
         return;
     }
 
-    if (llGetInventoryType("Body-"+choice) == INVENTORY_NOTECARD)
+    string newbody = choice;
+    if (subchoice)
     {
-        currentbody = choice;
+        newbody = subchoice + "-" + choice;
+    }
+
+    if (llGetInventoryType("Body-"+newbody) == INVENTORY_NOTECARD)
+    {
+        currentbody = newbody;
         bodyLine = 0;
         transformer = id;
         delete_listener(id);
 
-        kQueryBody = llGetNotecardLine("Body-"+choice,0);
+        kQueryBody = llGetNotecardLine("Body-"+newbody,0);
 
         llSleep(1.0);
 
-        llSay(0, dollname + " has changed to a " + currentbody + " body.");
+        llSay(0, dollname + " has changed to a " + choice + " body.");
     }
 }
 
@@ -1176,7 +1210,13 @@ default
             {
                 return;
             }
-            string menu = llList2Key(dialogUsers, pos+3);
+            list menulist = llParseStringKeepNulls(llList2Key(dialogUsers, pos+3), ["|"], []);
+            string menu = llList2String(menulist, 0);
+            string submenu = "";
+            if (llGetListLength(menulist) > 1)
+            {
+                submenu = llList2String(menulist, 1);
+            }
 
             if (menu == "main")
             {
@@ -1192,11 +1232,11 @@ default
             }
             else if (menu == "transform")
             {
-                transformmenu(choice, id, FALSE);
+                transformmenu(choice, submenu, id, FALSE);
             }
             else if (menu == "transform_confirm")
             {
-                transformmenu(choice, id, TRUE);
+                transformmenu(choice, submenu, id, TRUE);
             }
             else if (menu == "state")
             {
@@ -1236,7 +1276,7 @@ default
         {
             if (data != EOF)
             {
-                if (llStringLength(data) > 1)
+                if (data)
                 {
                     list curline = llParseStringKeepNulls(data, ["="], []);
                     string curopt = llList2String(curline, 0);
@@ -1244,7 +1284,7 @@ default
                     if (curopt == "URL")
                     {
                         // Set wardrobe URL
-                        wardrobeURL = curdata;
+                        wardrobeURL = llGetSubString(data, llSubStringIndex(data, "=")+1, -1);
                     }
                     else if (curopt == "Outfit")
                     {
@@ -1364,12 +1404,12 @@ default
     {
         if (perm & PERMISSION_TRIGGER_ANIMATION)
         {
-            if (llStringLength(currentanimation) > 0)
+            if (currentanimation)
             {
                 llStopAnimation(currentanimation);
                 llSleep(0.1);
             }
-            if (llStringLength(newanimation) > 0)
+            if (newanimation)
             {
                 aochange("off");
                 llStartAnimation(newanimation);
