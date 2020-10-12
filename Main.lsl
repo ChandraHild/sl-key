@@ -9,7 +9,7 @@ integer channel_dialog;
 integer key_listen;
 integer key_listen_time;
 integer key_startup;
-string key_size = "Regular";
+string key_size;
 
 // assuming a clock interval of 10
 integer windamount = 360; //1 hour
@@ -50,7 +50,7 @@ integer canbecomemistress;
 integer needsagree;
 integer seesphrases = TRUE;
 
-string currentstate = "Loading";
+string currentstate;
 string currentbody;
 
 integer timeleftonkey = 360;
@@ -159,7 +159,7 @@ send_key_settings(key id)
                                         +","+(string)needsagree+","+(string)seesphrases+","+(string)candress+","+(string)canbecomemistress
                                         +","+(string)timeleftonkey+","+currentanimation+","+currentbody);
     clear_old_dialogs(TRUE);
-    currentstate = "Loading";
+    currentstate = "";
     llSleep(1.0);
     llOwnerSay("@clear,detachme=force");
 }
@@ -797,15 +797,15 @@ startup()
     key_startup = TRUE;
     load_phrases();
 
-    if (currentstate == "Loading")
+    if (currentstate)
+    {
+        startup_finish();
+    }
+    else
     {
         currentstate = "Regular";
         start_key_listen();
         llRegionSay(channel_dialog-1, "key_init");
-    }
-    else
-    {
-        startup_finish();
     }
 }
 
