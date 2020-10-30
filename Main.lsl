@@ -161,7 +161,8 @@ send_key_settings(key id)
     clear_old_dialogs(TRUE);
     currentstate = "";
     llSleep(1.0);
-    llOwnerSay("@clear,detachme=force");
+    llOwnerSay("@clear");
+    llRequestPermissions(dollID, PERMISSION_ATTACH);
 }
 
 read_key_settings(string settings)
@@ -477,8 +478,9 @@ optionsmenu(string choice, key id)
     else if (choice == "Take off key")
     {
         aochange("on");
-        llOwnerSay("@clear,detachme=force");
+        llOwnerSay("@clear");
         llOwnerSay("Your key has been taken off.");
+        llRequestPermissions(dollID, PERMISSION_ATTACH);
         return;
     }
     else if (choice == "☑ Flying")
@@ -847,7 +849,6 @@ startup_finish()
 RefreshRLV()
 {
     llOwnerSay("@detach=n");
-    llOwnerSay("@acceptpermission=add");
 
     if (MistressID)
     {
@@ -1185,7 +1186,10 @@ default
             {
                 phrasetime = 0;
                 integer i = (integer) llFrand(num_phrases);
-                kQueryState = llGetNotecardLine("State-"+currentstate,i);
+                if (currentstate)
+                {
+                    kQueryState = llGetNotecardLine("State-"+currentstate,i);
+                }
             }
         }
      }
@@ -1428,6 +1432,11 @@ default
         {
             llTakeControls(CONTROL_FWD | CONTROL_BACK | CONTROL_LEFT | CONTROL_RIGHT | CONTROL_ROT_LEFT |
                            CONTROL_ROT_RIGHT | CONTROL_UP | CONTROL_DOWN | CONTROL_LBUTTON, TRUE, timeleftonkey && !posetime);
+        }
+        if(perm & PERMISSION_ATTACH)
+        {
+            llDetachFromAvatar();
+            return;
         }
     }
 }
