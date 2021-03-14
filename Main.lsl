@@ -43,6 +43,7 @@ integer stuck;
 integer canfly = TRUE;
 integer winddown = TRUE;
 integer afk;
+integer wardrobelocked;
 
 integer candress = TRUE;
 integer canbecomemistress;
@@ -157,11 +158,11 @@ send_key_settings(key id)
     llRegionSayTo(id, channel_dialog-1, (string)MistressID+","+currentstate+","+(string)visible+","+(string)detachable+","+(string)alwaysavailable
                                         +","+(string)pleasuredoll+","+(string)stuck+","+(string)canfly+","+(string)winddown+","+(string)afk
                                         +","+(string)needsagree+","+(string)seesphrases+","+(string)candress+","+(string)canbecomemistress
-                                        +","+(string)timeleftonkey+","+currentanimation+","+currentbody);
+                                        +","+(string)timeleftonkey+","+currentanimation+","+currentbody+","+(string)wardrobelocked);
     clear_old_dialogs(TRUE);
     currentstate = "";
-    llSleep(1.0);
     llOwnerSay("@clear");
+    llSleep(1);
     llRequestPermissions(dollID, PERMISSION_ATTACH);
 }
 
@@ -186,6 +187,7 @@ read_key_settings(string settings)
     timeleftonkey = llList2Integer(oldkey, 14);
     currentanimation = llList2String(oldkey, 15);
     currentbody = llList2String(oldkey, 16);
+    wardrobelocked = llList2Integer(oldkey, 17);
 
     llMessageLinked(LINK_ALL_CHILDREN, 17, currentstate, "");
     load_phrases();
@@ -194,6 +196,9 @@ read_key_settings(string settings)
         bodyLine = 0;
         kQueryBody = llGetNotecardLine("Body-"+currentbody,0);
     }
+
+    llSleep(2);
+    llMessageLinked(LINK_THIS, 4110, (string)wardrobelocked, "-1");
 }
 
 handlemenuchoices(string choice, key ToucherID)
@@ -219,7 +224,12 @@ handlemenuchoices(string choice, key ToucherID)
     else if (choice == "Body")
     {
         llOwnerSay(name + " is looking at your Transform options.");
-        show_transform_dialog("", ToucherID);
+        string mode = "";
+        if (currentstate == "Bimbo")
+        {
+            mode = ".Candi";
+        }
+        show_transform_dialog(mode, ToucherID);
     }
     else if (choice == "Mode")
     {
@@ -589,7 +599,7 @@ show_transform_dialog(string subtype, key id)
             else
             {
                 string choice = llList2String(note, 1);
-                if (!~llListFindList(choices, (list)choice))
+                if (!~llListFindList(choices, (list)choice) && llGetSubString(choice, 0, 0) != ".")
                 {
                     choices += choice;
                 }
@@ -1002,7 +1012,7 @@ default
         string timeleft = "Time Left on key is " + (string)displaytime + " minutes. ";
 
         string msg;
-        list menu =  ["Wind"];
+        list menu;
 
         if (ToucherID == dollID)
         {
@@ -1014,6 +1024,11 @@ default
             else if (carrierID)
             {
                 msg = "You are currently being carried";
+                menu = ["OK", "Options"];
+            }
+            else if (wardrobelocked)
+            {
+                msg = "You are locked out of your wardrobe";
                 menu = ["OK", "Options"];
             }
             else
@@ -1043,7 +1058,7 @@ default
             if (ToucherID == carrierID)
             {
                 msg = "Place Down frees " + dollname + " when you are done with her";
-                menu += ["Place Down", "Pose"];
+                menu += ["Wind", "Place Down", "Pose"];
                 if (candress)
                 {
                     menu += ["Dress", "Body"];
@@ -1080,7 +1095,7 @@ default
             {
                 msg += " She is currently marked AFK.";
             }
-            menu += "Carry";
+            menu += ["Wind", "Carry"];
             if (candress)
             {
                 menu += ["Dress", "Body"];
@@ -1091,6 +1106,10 @@ default
                 menu += "Unpose";
             }
             menu += "Pose";
+        }
+        else
+        {
+            menu += "Wind";
         }
         if (ToucherID == MistressID || ToucherID == ChristinaID)
         {
@@ -1203,6 +1222,19 @@ default
                 start_key_listen();
             }
         }
+        else if (num == 4110)
+        {
+            // Wardrobe locking
+            if (choice == "1")
+            {
+                wardrobelocked = TRUE;
+            }
+            else
+            {
+                wardrobelocked = FALSE;
+            }
+        }
+
     }
 
     listen(integer channel, string name, key id, string choice)
@@ -1294,6 +1326,7 @@ default
                     {
                         if (!key_startup)
                         {
+                            llOwnerSay("@sharedwear=y,sharedunwear=y,unsharedwear=y,unsharedunwear=y");
                             llOwnerSay("@detachallthis:"+curdata+"=n");
                             llOwnerSay("@remoutfit=force,detach=force");
                             llOwnerSay("@attachover:"+curdata+"=force");
