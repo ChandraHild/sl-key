@@ -793,7 +793,7 @@ uncarry()
 // Things to do every time the key is worn or we log in
 startup()
 {
-    if (llGetAttached() != ATTACH_BACK)
+    if (!llGetAttached())
     {
         llTargetOmega(ZERO_VECTOR, 0, 0);
         llSetTimerEvent(0.0);
@@ -988,7 +988,7 @@ default
             return;
         }
 
-        if (llGetAttached() != ATTACH_BACK)
+        if (!llGetAttached())
         {
             llRegionSayTo(ToucherID, PUBLIC_CHANNEL, "The key must be attached to the doll's back before you can use it.");
             return;
