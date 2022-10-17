@@ -215,6 +215,11 @@ handlemenuchoices(string choice, key ToucherID)
         carrierID = ToucherID;
         RefreshRLV();
         llSay(PUBLIC_CHANNEL, dollname + " has been picked up by " + name);
+        llOwnerSay("@adjustheight:25=force");
+        if (currentanimation == "")
+        {
+            animate("beautystand");
+        }
     }
     else if (choice == "Place Down")
     {
@@ -298,7 +303,6 @@ handlemenuchoices(string choice, key ToucherID)
         {
             // Uncollapsing
             timeleftonkey = windamount;
-            //_M01C_llTargetOmega(<0,0,1>,.3,1.0);
             RefreshRLV();
 
             if (currentstate == "Display")
@@ -318,7 +322,6 @@ handlemenuchoices(string choice, key ToucherID)
         }
         llSay(PUBLIC_CHANNEL, " -- " + name + " has given " + dollname + " 1 hour of life.");
 
-        //_M05A
         windanimate(3);
     }
 
@@ -530,7 +533,6 @@ optionsmenu(string choice, key id)
         llOwnerSay("CTS Wardrobe Reset");
     }
 
-    //_M02
     handlemenuchoices("Options", id);
 }
 
@@ -695,11 +697,9 @@ animate(string animation)
 
 startafk()
 {
-    // CH06
     winddown = FALSE;
     afk = TRUE;
 
-    //_M01C
     llTargetOmega(ZERO_VECTOR, 0.0, 0.0);
     RefreshRLV();
 }
@@ -713,7 +713,7 @@ stopafk()
     {
         return;
     }
-    //_M01C \/
+
     llTargetOmega(<0.0, 0.0, 1.0>, 3.0, 1.0);
     llSleep(2.0);
     llTargetOmega(<0.0, 0.0, 1.0>, 2.0, 1.0);
@@ -721,14 +721,12 @@ stopafk()
     llTargetOmega(<0.0, 0.0, 1.0>, 1.0, 1.0);
     llSleep(1.0);
     llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);
-    //_M01C /\
 
     RefreshRLV();
 }
 
 collapse()
 {
-    //_M03B \/
     string animation;
     if(llGetAgentInfo(dollID) & AGENT_SITTING)
     {
@@ -738,7 +736,6 @@ collapse()
     {
         animation = "collapse";
     }
-    //_M03B /\
 
     llTargetOmega(ZERO_VECTOR, 0, 0);
     visible = TRUE;
@@ -751,7 +748,6 @@ aochange(string choice)
 {
     integer g_iAOChannel = -782690;
 
-    //_CH17
     integer g_iInterfaceChannel = -llAbs((integer)("0x" + llGetSubString(dollID,30,-1)));
     string aocmd;
     if (choice == "off")
@@ -767,8 +763,6 @@ aochange(string choice)
     llWhisper(g_iAOChannel, aocmd);
     llMessageLinked(LINK_SET, 0, aocmd, NULL_KEY);
 
-
-    //_CH23 \/
     if (llGetAgentInfo(dollID) & AGENT_SITTING)
     {
         // Wait a little bit so that the AO has time to process things
@@ -776,7 +770,6 @@ aochange(string choice)
         llStopAnimation("sit");
         llSleep(0.1);
     }
-    //_CH23 \/
 }
 
 uncarry()
@@ -786,6 +779,11 @@ uncarry()
         llOwnerSay("@tplure:" + (string)carrierID + "=rem,accepttp:" + (string)carrierID + "=rem");
     }
     llSay(PUBLIC_CHANNEL, dollname + " has been set down.");
+    llOwnerSay("@adjustheight:0=force");
+    if (currentstate != "Display")
+    {
+        animate("");
+    }
     carrierID = NULL_KEY;
     RefreshRLV();
 }
@@ -922,7 +920,7 @@ RefreshRLV()
         }
     }
 }
-//_M05A \/
+
 windanimate(integer i)
 {
     if (i < 1)
@@ -933,21 +931,19 @@ windanimate(integer i)
     llSleep(0.5);
     do
     {
-        //_M05B
         llPlaySound("07af5599-8529-fb12-5891-1dcf1a33ee49", 1.0);
         //       '- [Muniki K[_Clock Key Winding Up, Free Sound Effects (YTube)]
         llTargetOmega(<0.0, 0.0,-1.0>, 120.0*DEG_TO_RAD/0.5, 1.0);
         llSleep(0.5);  //              '- 60o in 0.5s
         llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 0.0);
         llSleep(0.5);
-        i--;
-    } while (i);
+    }
+    while (--i);
     if (winddown)
     {
         llTargetOmega(<0.0, 0.0, 1.0>, 0.3, 1.0);
     }
 }
-//_M05A /\
 
 default
 {
@@ -1007,7 +1003,6 @@ default
             return;
         }
 
-        //_M04B
         integer displaytime = (integer) ((timeleftonkey+5) / 6);
         string timeleft = "Time Left on key is " + (string)displaytime + " minutes. ";
 
@@ -1064,10 +1059,6 @@ default
                     menu += ["Dress", "Body"];
                 }
                 menu += "Mode";
-                if (posetime)
-                {
-                    menu += "Unpose";
-                }
                 if (canbecomemistress)
                 {
                     menu += "Be Controller";
@@ -1115,14 +1106,13 @@ default
         {
             menu = llListInsertList(menu, ["Options"], 3);
 
-            //_M04A
             llWhisper(-60946337, "wind channel|" + (string)channel_dialog);
         }
         llDialog(ToucherID, timeleft + msg,  menu, channel_dialog);
-        if(ToucherID != dollID)                                                         //_M06 \/
+        if(ToucherID != dollID)
         {
             llPlaySound("07af5599-8529-fb12-5891-1dcf1a33ee49", 0.0);
-        }                                                                               //_M06 /\
+        }
     }
 
     timer()
@@ -1152,8 +1142,7 @@ default
         // Called every time interval
         if (winddown && timeleftonkey)
         {
-            timeleftonkey--;
-            if (!timeleftonkey)
+            if (!--timeleftonkey)
             {
                 collapse();
                 llSay(PUBLIC_CHANNEL, dollname + " has run out of life");
@@ -1161,10 +1150,9 @@ default
         }
         if (posetime)
         {
-            if (timeleftonkey && currentstate != "Display")
+            if (timeleftonkey && currentstate != "Display" && carrierID == NULL_KEY)
             {
-                posetime--;
-                if (!posetime)
+                if (!--posetime)
                 {
                     animate("");
                 }
