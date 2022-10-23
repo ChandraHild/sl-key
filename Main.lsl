@@ -365,15 +365,10 @@ handlemenuchoices(string choice, key ToucherID)
             pluslist = ["Drop control"];
             ToucherIsOwner = TRUE;
         }
-        else
-        {
-            // Access denied
-            return;
-        }
         update_dialog_timestamp(ToucherID, "options");
         pluslist += [checkbox(afk) + " AFK"];
 
-        if (carrierID == NULL_KEY || ToucherID != dollID)
+        if (ToucherIsOwner || (carrierID == NULL_KEY && ToucherID == dollID))
         {
             if (detachable)
             {
@@ -411,104 +406,108 @@ handlemenuchoices(string choice, key ToucherID)
                 pluslist += "☐ Flying";
             }
 
-            pluslist += [checkbox(pleasuredoll) + " Pleasure", checkbox(visible) + " Visible"];
+            pluslist += [checkbox(pleasuredoll) + " Pleasure"];
         }
+        pluslist += [checkbox(visible) + " Visible"];
         llDialog(ToucherID, msg, pluslist, channel_dialog);
     }
 }
 
 optionsmenu(string choice, key id)
 {
-    if (choice == "☑ Automatic" || choice == "☐ Automatic")
+    if (id == MistressID || id == ChristinaID || id == dollID)
     {
-        needsagree = !needsagree;
+        if (choice == "☑ Automatic" || choice == "☐ Automatic")
+        {
+            needsagree = !needsagree;
+        }
+        else if (choice == "☑ Phrases" || choice == "☐ Phrases")
+        {
+            seesphrases = !seesphrases;
+        }
+        else if (choice == "☑ Detachable")
+        {
+            detachable = FALSE;
+            llOwnerSay("Your key cannot be detached.");
+        }
+        else if (choice == "☐ Detachable")
+        {
+            detachable = TRUE;
+            llOwnerSay("Your key can be detached.");
+        }
+        else if (choice == "☐ Auto TP")
+        {
+            llOwnerSay("You must accept all tp offers.");
+            alwaysavailable = TRUE;
+            RefreshRLV();
+        }
+        else if (choice == "☑ Auto TP")
+        {
+            alwaysavailable = FALSE;
+            RefreshRLV();
+            llOwnerSay("You can reject teleport offers.");
+        }
+        else if (choice == "☐ Pleasure")
+        {
+            llOwnerSay("Your key thinks you are a pleasure doll.");
+            pleasuredoll = TRUE;
+        }
+        else if (choice == "☑ Pleasure")
+        {
+            llOwnerSay("Your key does not treat you like a pleasure doll.");
+            pleasuredoll = FALSE;
+        }
+        else if (choice == "☑ Self TP")
+        {
+            llOwnerSay("Helpless doll! You cannot teleport yourself.");
+            stuck = TRUE;
+            RefreshRLV();
+        }
+        else if (choice == "☐ Self TP")
+        {
+            stuck = FALSE;
+            RefreshRLV();
+            llOwnerSay("You may travel on your own initiative.");
+        }
+        else if (choice == "☐ Dressing")
+        {
+            llOwnerSay("Other people can dress you.");
+            candress = TRUE;
+        }
+        else if (choice == "☑ Dressing")
+        {
+            llOwnerSay("Other people cannot dress you.");
+            candress = FALSE;
+        }
+        else if (choice == "Drop control")
+        {
+            llSay(PUBLIC_CHANNEL, dollname + "'s controller has given up control.");
+            llOwnerSay("@tplure:" + (string) MistressID + "=rem,accepttp:" + (string) MistressID + "=rem");
+            MistressID = NULL_KEY;
+            RefreshRLV();
+        }
+        else if (choice == "Take off key")
+        {
+            aochange("on");
+            llOwnerSay("@clear");
+            llOwnerSay("Your key has been taken off.");
+            llRequestPermissions(dollID, PERMISSION_ATTACH);
+            return;
+        }
+        else if (choice == "☑ Flying")
+        {
+            canfly = FALSE;
+            RefreshRLV();
+            llOwnerSay("You have given up your ability to fly. Helpless dolly!");
+        }
+        else if (choice == "☐ Flying")
+        {
+            canfly = TRUE;
+            RefreshRLV();
+            llOwnerSay("You can fly again.");
+        }
     }
-    else if (choice == "☑ Phrases" || choice == "☐ Phrases")
-    {
-        seesphrases = !seesphrases;
-    }
-    else if (choice == "☑ Detachable")
-    {
-        detachable = FALSE;
-        llOwnerSay("Your key cannot be detached.");
-    }
-    else if (choice == "☐ Detachable")
-    {
-        detachable = TRUE;
-        llOwnerSay("Your key can be detached.");
-    }
-    else if (choice == "☐ Auto TP")
-    {
-        llOwnerSay("You must accept all tp offers.");
-        alwaysavailable = TRUE;
-        RefreshRLV();
-    }
-    else if (choice == "☑ Auto TP")
-    {
-        alwaysavailable = FALSE;
-        RefreshRLV();
-        llOwnerSay("You can reject teleport offers.");
-    }
-    else if (choice == "☐ Pleasure")
-    {
-        llOwnerSay("Your key thinks you are a pleasure doll.");
-        pleasuredoll = TRUE;
-    }
-    else if (choice == "☑ Pleasure")
-    {
-        llOwnerSay("Your key does not treat you like a pleasure doll.");
-        pleasuredoll = FALSE;
-    }
-    else if (choice == "☑ Self TP")
-    {
-        llOwnerSay("Helpless doll! You cannot teleport yourself.");
-        stuck = TRUE;
-        RefreshRLV();
-    }
-    else if (choice == "☐ Self TP")
-    {
-        stuck = FALSE;
-        RefreshRLV();
-        llOwnerSay("You may travel on your own initiative.");
-    }
-    else if (choice == "☐ Dressing")
-    {
-        llOwnerSay("Other people can dress you.");
-        candress = TRUE;
-    }
-    else if (choice == "☑ Dressing")
-    {
-        llOwnerSay("Other people cannot dress you.");
-        candress = FALSE;
-    }
-    else if (choice == "Drop control")
-    {
-        llSay(PUBLIC_CHANNEL, dollname + "'s controller has given up control.");
-        llOwnerSay("@tplure:" + (string) MistressID + "=rem,accepttp:" + (string) MistressID + "=rem");
-        MistressID = NULL_KEY;
-        RefreshRLV();
-    }
-    else if (choice == "Take off key")
-    {
-        aochange("on");
-        llOwnerSay("@clear");
-        llOwnerSay("Your key has been taken off.");
-        llRequestPermissions(dollID, PERMISSION_ATTACH);
-        return;
-    }
-    else if (choice == "☑ Flying")
-    {
-        canfly = FALSE;
-        RefreshRLV();
-        llOwnerSay("You have given up your ability to fly. Helpless dolly!");
-    }
-    else if (choice == "☐ Flying")
-    {
-        canfly = TRUE;
-        RefreshRLV();
-        llOwnerSay("You can fly again.");
-    }
-    else if (choice == "☑ Visible")
+    if (choice == "☑ Visible")
     {
         visible = FALSE;
         llSetLinkAlpha(LINK_SET, 0.0, ALL_SIDES);
@@ -1053,7 +1052,7 @@ default
             if (ToucherID == carrierID)
             {
                 msg = "Place Down frees " + dollname + " when you are done with her";
-                menu += ["Wind", "Place Down", "Pose"];
+                menu += ["Wind", "Place Down", "Pose", "Options"];
                 if (candress)
                 {
                     menu += ["Dress", "Body"];
@@ -1086,7 +1085,7 @@ default
             {
                 msg += " She is currently marked AFK.";
             }
-            menu += ["Wind", "Carry"];
+            menu += ["Wind", "Carry", "Options"];
             if (candress)
             {
                 menu += ["Dress", "Body"];
@@ -1100,14 +1099,9 @@ default
         }
         else
         {
-            menu += "Wind";
+            menu += ["Wind", "Options"];
         }
-        if (ToucherID == MistressID || ToucherID == ChristinaID)
-        {
-            menu = llListInsertList(menu, ["Options"], 3);
 
-            llWhisper(-60946337, "wind channel|" + (string)channel_dialog);
-        }
         llDialog(ToucherID, timeleft + msg,  menu, channel_dialog);
         if(ToucherID != dollID)
         {
