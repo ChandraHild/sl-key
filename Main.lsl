@@ -349,7 +349,7 @@ handlemenuchoices(string choice, key ToucherID)
     }
     else if (choice == "Options")
     {
-        string msg;
+        string msg = "See http://CommunityDolls.com/controller.htm Choose what you want to happen";
         list pluslist;
         integer ToucherIsOwner = FALSE;
         if (ToucherID == dollID)
@@ -361,7 +361,6 @@ handlemenuchoices(string choice, key ToucherID)
         else if (ToucherID == MistressID || ToucherID == ChristinaID)
         {
             // Owner is accessing our options
-            msg = "See http://CommunityDolls.com/controller.htm Choose what you want to happen";
             pluslist = ["Drop control"];
             ToucherIsOwner = TRUE;
         }
