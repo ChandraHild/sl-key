@@ -204,7 +204,11 @@ read_key_settings(string settings)
 handlemenuchoices(string choice, key ToucherID)
 {
     string name = "secondlife:///app/agent/" + (string)ToucherID + "/displayname";
-    if (choice == "Carry")
+    if (choice == "Exit")
+    {
+        delete_listener(ToucherID);
+    }
+    else if (choice == "Carry")
     {
         delete_listener(ToucherID);
         if (carrierID)
@@ -345,7 +349,7 @@ handlemenuchoices(string choice, key ToucherID)
         llOwnerSay("The person carrying you has taken over as your controller.");
         string msg = "You are now " + dollname + "'s controller. See http://CommunityDolls.com/controller.htm";
         RefreshRLV();
-        llDialog(ToucherID,msg,["OK"] , 9999);
+        llDialog(ToucherID,msg,["Exit"] , 9999);
     }
     else if (choice == "Options")
     {
@@ -574,7 +578,7 @@ dressmenu(key id)
     }
     else
     {
-        llDialog(id, "No outfits found", ["OK"], 9999);
+        llDialog(id, "No outfits found", ["Exit"], 9999);
     }
 }
 
@@ -622,7 +626,7 @@ transformmenu(string choice, string subchoice, key id, integer confirmed)
     {
         if(!create_or_get_listen(dollID))
         {
-            llDialog(id, "The doll cannot transform at this time, please try again later.", ["OK"], 9999);
+            llDialog(id, "The doll cannot transform at this time, please try again later.", ["Exit"], 9999);
             return;
         }
         update_dialog_timestamp(id, "transform");
@@ -1005,29 +1009,28 @@ default
         string timeleft = "Time Left on key is " + (string)displaytime + " minutes. ";
 
         string msg;
-        list menu;
+        list menu = ["Exit"];
 
         if (ToucherID == dollID)
         {
             if (!timeleftonkey)
             {
                 msg = "You need winding.";
-                menu = ["OK"];
             }
             else if (carrierID)
             {
                 msg = "You are currently being carried";
-                menu = ["OK", "Options"];
+                menu += "Options";
             }
             else if (wardrobelocked)
             {
                 msg = "You are locked out of your wardrobe";
-                menu = ["OK", "Options"];
+                menu += "Options";
             }
             else
             {
                 msg = "See http://CommunityDolls.com/dollkeyselfinfo.htm\nYou are a " + currentstate + " doll with a " + currentbody + " body.";
-                menu = ["Dress", "Options"];
+                menu += ["Dress", "Options"];
                 if (!posetime)
                 {
                     menu += "Pose";
@@ -1073,7 +1076,6 @@ default
             else
             {
                 msg = dollname + " is currently being carried. Sorry.";
-                menu += "OK";
             }
         }
         else if (timeleftonkey)
