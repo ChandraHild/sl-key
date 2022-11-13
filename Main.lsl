@@ -204,7 +204,7 @@ read_key_settings(string settings)
 handlemenuchoices(string choice, key ToucherID)
 {
     string name = "secondlife:///app/agent/" + (string)ToucherID + "/displayname";
-    if (choice == "Exit")
+    if (choice == "Exit" || choice == "-")
     {
         delete_listener(ToucherID);
     }
@@ -1009,7 +1009,7 @@ default
         string timeleft = "Time Left on key is " + (string)displaytime + " minutes. ";
 
         string msg;
-        list menu = ["Exit"];
+        list menu = ["-", "Exit", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-"];
 
         if (ToucherID == dollID)
         {
@@ -1020,33 +1020,25 @@ default
             else if (carrierID)
             {
                 msg = "You are currently being carried";
-                menu += "Options";
+                menu = llListReplaceList(menu, ["Options"], 2, 2);
             }
             else if (wardrobelocked)
             {
                 msg = "You are locked out of your wardrobe";
-                menu += "Options";
+                menu = llListReplaceList(menu, ["Options"], 2, 2);
             }
             else
             {
                 msg = "See http://CommunityDolls.com/dollkeyselfinfo.htm\nYou are a " + currentstate + " doll with a " + currentbody + " body.";
-                menu += ["Dress", "Options"];
+                menu = llListReplaceList(menu, ["Options", "Body", "Dress", "Mode"], 2, 5);
                 if (!posetime)
                 {
-                    menu += "Pose";
+                    menu = llListReplaceList(menu, ["Pose"], 8, 8);
                 }
-                menu += ["Body", "Mode"];
             }
             if (MistressID == NULL_KEY)
             {
-                if (canbecomemistress)
-                {
-                    menu += "☑ Takeover";
-                }
-                else
-                {
-                    menu += "☐ Takeover";
-                }
+                menu = llListReplaceList(menu, [checkbox(!canbecomemistress) + " Takeover"], 10, 10);
             }
         }
         else if (carrierID)
@@ -1054,24 +1046,26 @@ default
             if (ToucherID == carrierID)
             {
                 msg = "Place Down frees " + dollname + " when you are done with her";
-                menu += ["Wind", "Place Down", "Pose", "Options"];
+                menu = llListReplaceList(menu, ["Wind"], 0, 0);
+                menu = llListReplaceList(menu, ["Options"], 2, 2);
+                menu = llListReplaceList(menu, ["Mode"], 5, 5);
+                menu = llListReplaceList(menu, ["Pose", "Place Down"], 8, 9);
                 if (candress)
                 {
-                    menu += ["Dress", "Body"];
+                    menu = llListReplaceList(menu, ["Body", "Dress"], 3, 4);
                 }
-                menu += "Mode";
                 if (canbecomemistress)
                 {
-                    menu += "Be Controller";
+                    menu = llListReplaceList(menu, ["Be Controller"], 10, 10);
                 }
                 if (pleasuredoll || currentstate == "Slut")
                 {
-                    menu += "Strip";
+                    menu = llListReplaceList(menu, ["Strip"], 7, 7);
                 }
             }
             else if (ToucherID == MistressID || ToucherID == ChristinaID)
             {
-                menu += "Carry";
+                menu = llListReplaceList(menu, ["Carry"], 6, 6);
             }
             else
             {
@@ -1086,21 +1080,23 @@ default
             {
                 msg += " She is currently marked AFK.";
             }
-            menu += ["Wind", "Carry", "Options"];
+            menu = llListReplaceList(menu, ["Wind"], 0, 0);
+            menu = llListReplaceList(menu, ["Options"], 2, 2);
+            menu = llListReplaceList(menu, ["Mode", "Carry"], 5, 6);
+            menu = llListReplaceList(menu, ["Pose"], 8, 8);
             if (candress)
             {
-                menu += ["Dress", "Body"];
+                menu = llListReplaceList(menu, ["Body", "Dress"], 3, 4);
             }
-            menu += "Mode";
             if (posetime)
             {
-                menu += "Unpose";
+                menu = llListReplaceList(menu, ["Unpose"], 11, 11);
             }
-            menu += "Pose";
         }
         else
         {
-            menu += ["Wind", "Options"];
+            menu = llListReplaceList(menu, ["Wind"], 0, 0);
+            menu = llListReplaceList(menu, ["Options"], 2, 2);
         }
 
         llDialog(ToucherID, timeleft + msg,  menu, channel_dialog);
